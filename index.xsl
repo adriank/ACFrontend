@@ -60,12 +60,10 @@
 		</head>
 		<body>
 			<x:apply-templates select="$layoutdoc"/>
-			<x:if test="count(//error)">
-				<x:copy-of select="//error"/>
+			<x:if test="count($doc/object[@name='GlobalError'])">
+				<h1><x:value-of select="$doc/object[@name='GlobalError']"/></h1>
+				<x:copy-of select="$doc/object[@name='GlobalError']"/>
 			</x:if>
-			<!--<x:if test="$role='admin'">-->
-			<!--	<div id="accms-admin"/>-->
-			<!--</x:if>-->
 		</body>
 		</html>
 	</x:template>
@@ -80,7 +78,6 @@
 		</div>
 	</x:template>
 
-	<!-- make 'last' the default type -->
 	<x:template match="column">
 		<x:variable name="type">
 			<x:value-of select="@type"/>
