@@ -89,8 +89,8 @@
 	</x:template>
 
 	<x:template match="script|pagetitle|style"/>
-	<x:template match="widget">
-		<x:variable name="datasource" select="$doc/*[@name=current()/@datasource]"/>
+	<x:template match="widget" name="widget">
+		<x:param name="datasource" select="$doc/*[@name=current()/@datasource]"/>
 		<x:variable name="tag">
 			<x:value-of select="@tag"/>
 			<x:if test="not(@tag)">div</x:if>
@@ -157,7 +157,8 @@
 	</x:template>
 	<!-- TODO add required fields support -->
 	<x:template match="widget[@type='form']" mode="widget">
-		<x:variable name="values" select="$doc//object[@name=current()/@values]"/>
+		<x:param name="datasource" select="$doc//object[@name=current()/@values]"/>
+		<x:variable name="values" select="$datasource"/>
 		<form action="{@action}" method="post" enctype="multipart/form-data">
 			<x:for-each select="item">
 				<x:variable name="value">
@@ -262,6 +263,11 @@
 			</x:when>
 			<x:when test="local-name(.)='attr'">
 				<x:value-of select="$datasource/@*[local-name()=current()/@name]"/>
+			</x:when>
+			<x:when test="local-name(.)='widget'">
+				<x:call-template name="widget">
+					<x:with-param name="datasource" select="$datasource"/>
+				</x:call-template>
 			</x:when>
 			<x:when test="not(name())">
 				<x:value-of select="."/>
