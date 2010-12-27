@@ -45,15 +45,10 @@
 			<!-- export css and js to config.xml -->
 			<link rel="stylesheet" type="text/css" href="http://e.acimg.eu/css/yui-rf.css"/>
 			<link href="http://e.acimg.eu/css/grids.css" rel="stylesheet" type="text/css"/>
-			<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.2.0/build/node-menunav/assets/skins/sam/node-menunav.css"/>
-			<link href="http://e.acimg.eu/css/style.css" id="customstyles" rel="stylesheet" type="text/css"/>
 			<link href="{$static}css/style.css" rel="stylesheet" type="text/css"/>
 			<x:for-each select="$doc//style">
 				<link href="{@url}" rel="stylesheet" type="text/css"/>
 			</x:for-each>
-			<!--<x:if test="$role='admin'">-->
-			<!--	<link href="http://e.acimg.eu/css/admin.css" rel="stylesheet" type="text/css"/>-->
-			<!--</x:if>-->
 			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.2.0/build/yui/yui-min.js&amp;3.2.0/build/loader/loader-min.js"></script>
 			<script type="text/javascript" src="/js/init.js"/>
 			<script type="text/javascript"><x:value-of select="$doc//*[@name='layout']/script"/></script>
@@ -157,18 +152,22 @@
 	</x:template>
 	<!-- TODO add required fields support -->
 	<x:template match="widget[@type='form']" mode="widget">
-		<x:param name="datasource" select="$doc//object[@name=current()/@values]"/>
-		<x:variable name="values" select="$datasource"/>
+		<x:param name="datasource" select="$doc//object[@name=current()/@datasource]"/>
 		<form action="{@action}" method="post" enctype="multipart/form-data">
 			<x:for-each select="item">
 				<x:variable name="value">
-					<x:variable name="helper" select="$values/*[name()=current()/@name]"/>
+					<x:variable name="helper" select="$datasource/*[name()=current()/@name]"/>
 					<x:choose>
 						<x:when test="@value">
 							<x:copy-of select="$doc//object[@name=current()/@value]/node()"/>
 						</x:when>
-						<x:when test="not($helper)">
-							<x:copy-of select="."/>
+						<!--<x:when test="not($helper)">-->
+						<x:when test="count(node())">
+							<x:for-each select="node()">
+								<x:call-template name="template">
+									<x:with-param name="datasource" select="$datasource"/>
+								</x:call-template>
+							</x:for-each>
 						</x:when>
 						<x:otherwise>
 							<x:copy-of select="$helper/node()"/>
