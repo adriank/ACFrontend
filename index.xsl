@@ -6,7 +6,6 @@
 <!-- TODO some of these variables should be merged with others -->
 	<x:variable name="doc" select="/list"/>
 	<x:variable name="lang" select="//object[@name='acf:lang']/@current"/>
-<!-- TODO create generator which sets domain -->
 <!-- IE don't understand relative paths so domain MUST be predefined -->
 	<x:variable name="domain" select="//object[@name='acf:appDetails']/@domain"/>
 	<!--<x:variable name="configdoc" select="document(concat($domain,'/xml/config.xml'))/config"/>-->
@@ -16,9 +15,7 @@
 	<x:variable name="langdoc" select="document(concat('../texts/',$lang,'.xml'))/t"/>
 	<x:variable name="static" select="$configdoc/staticdomain/node()"/>
 	<x:variable name="role" select="$doc/object[@name='acf:user']/@role"/>
-	<!--<x:variable name="f"><x:value-of select="$domain"/>layouts/<x:value-of select="/document/view/@name"/>.xml</x:variable>-->
 	<x:variable name="layoutdoc" select="//object[@name='layout']"/>
-	<!--<x:variable name="layoutdoc" select="document($layoutfile)/layout"/>-->
 	<x:include href="widgets.xsl"/>
 
 	<x:template match="/">
@@ -161,7 +158,6 @@
 						<x:when test="@value">
 							<x:copy-of select="$doc//object[@name=current()/@value]/node()"/>
 						</x:when>
-						<!--<x:when test="not($helper)">-->
 						<x:when test="count(node())">
 							<x:for-each select="node()">
 								<x:call-template name="template">

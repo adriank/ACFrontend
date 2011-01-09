@@ -158,7 +158,7 @@
 
 	<x:template match="widget[@type='wiki']" mode="widget">
 		<x:param name="datasource" select="@datasource"/>
-		<x:if test="not($datasource/langid)">
+		<x:if test="not($datasource/permalink)">
 			<x:copy-of select="$langdoc//noArticle/node()"/>
 		</x:if>
 		<x:if test="$role='admin'">
