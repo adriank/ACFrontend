@@ -164,11 +164,11 @@
 		<x:if test="$role='admin'">
 			<div class="accms-optionsPanel">
 				<x:choose>
-					<x:when test="$datasource/langid">
-						<a class="edit" href="#langid-{$datasource/langid}"/>
+					<x:when test="$datasource/permalink">
+						<a class="edit" href="#permalink-{$datasource/permalink}"/>
 					</x:when>
 					<x:otherwise>
-						<a class="add" href="#langid-{@langid}"/>
+						<a class="add" href="#permalink-{@permalink}"/>
 					</x:otherwise>
 				</x:choose>
 			</div>
