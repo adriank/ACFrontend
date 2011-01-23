@@ -53,8 +53,8 @@
 		<body>
 			<x:apply-templates select="$layoutdoc"/>
 			<x:if test="count($doc/object[@name='GlobalError'])">
-				<h1><x:value-of select="$doc/object[@name='GlobalError']"/></h1>
-				<x:copy-of select="$doc/object[@name='GlobalError']"/>
+				<h1>GlobalError <x:value-of select="$doc/object[@name='GlobalError']/@error"/></h1>
+				<x:copy-of select="$doc/object[@name='GlobalError']/node()"/>
 			</x:if>
 		</body>
 		</html>
