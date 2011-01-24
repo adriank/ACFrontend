@@ -215,11 +215,11 @@
 										<x:if test="count(@multiple)">
 											<x:attribute name="multiple">multiple</x:attribute>
 										</x:if>
-										<x:for-each select="$doc//object[@name=current()/@type]/*">
+										<x:for-each select="$doc//*[@name=current()/@type]/*">
 											<x:variable name="optionValue">
 												<x:choose>
 													<x:when test="count(@value)=1"><x:value-of select="@value"/></x:when>
-													<x:when test="count(value)=1"><x:value-of select="value"/></x:when>
+													<x:when test="count(value)"><x:value-of select="value"/></x:when>
 													<x:otherwise><x:value-of select="."/></x:otherwise>
 												</x:choose>
 											</x:variable>
@@ -227,7 +227,6 @@
 											<x:if test="$value=@value">
 												<x:attribute name="selected">selected</x:attribute>
 											</x:if><x:value-of select="$langdoc//*[local-name()=current()/@ml]|name"/>
-											<!--<x:value-of select="current()/@ml"/>-->
 											</option>
 										</x:for-each>
 									</select>
