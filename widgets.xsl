@@ -21,7 +21,7 @@
 		<x:attribute name="class">widget yui3-menu <x:value-of select="@class"/></x:attribute>
 		<x:variable name="accesskey" select="@accesskey"/>
 		<div class="yui3-menu-content">
-		<ul accesskey="@accesskey">
+		<ul>
 			<x:for-each select="*">
 				<x:variable name="pos" select="position()=1"/>
 				<li class="yui3-menuitem">
@@ -48,9 +48,9 @@
 						</x:when>
 						<x:otherwise>
 							<a class="yui3-menuitem-content" href="{@href}">
-<!--								<x:if test="position()=1">
+								<x:if test="position()=1">
 									<x:attribute name="accesskey"><x:value-of select="$accesskey"/></x:attribute>
-								</x:if>-->
+								</x:if>
 								<x:value-of select="$langdoc/menu/*[local-name()=current()/@name]"/>
 							</a>
 						</x:otherwise>
