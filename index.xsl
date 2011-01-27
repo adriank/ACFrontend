@@ -101,15 +101,15 @@
 				<x:if test="not(@type)">template</x:if>
 			</x:variable>
 
+			<x:variable name="subtag">
+				<x:value-of select="@subtag"/>
+				<x:if test="not(@subtag)">div</x:if>
+			</x:variable>
 			<x:choose>
 				<x:when test="local-name($datasource)='list'">
 					<x:attribute name="class">widget <x:value-of select="$type"/>-list <x:value-of select="@class"/></x:attribute>
 					<x:copy-of select="$before"/>
 					<x:variable name="this" select="."/>
-					<x:variable name="subtag">
-						<x:value-of select="@subtag"/>
-						<x:if test="not(@subtag)">div</x:if>
-					</x:variable>
 					<x:variable name="subtagclass" select="@subtagclass"/>
 					<x:if test="$role='admin'">
 						<div class="accms-optionsPanel"/>
