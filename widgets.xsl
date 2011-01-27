@@ -29,6 +29,9 @@
 						</x:when>
 						<x:when test="count(item)">
 							<a class="yui3-menu-label" href="#{@name}">
+								<x:if test="position()=1">
+									<x:attribute name="accesskey"><x:value-of select="$accesskey"/></x:attribute>
+								</x:if>
 								<x:value-of select="$langdoc/menu/*[local-name()=current()/@name]"/>
 							</a>
 							<div id="{@name}" class="yui3-menu yui3-menu-hidden">
@@ -43,6 +46,9 @@
 						</x:when>
 						<x:otherwise>
 							<a class="yui3-menuitem-content" href="{@href}">
+								<x:if test="position()=1">
+									<x:attribute name="accesskey"><x:value-of select="$accesskey"/></x:attribute>
+								</x:if>
 								<x:value-of select="$langdoc/menu/*[local-name()=current()/@name]"/>
 							</a>
 						</x:otherwise>
