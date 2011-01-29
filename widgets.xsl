@@ -19,15 +19,19 @@
 
 	<x:template match="widget[@type='menu']" mode="widget">
 		<x:attribute name="class">widget yui3-menu <x:value-of select="@class"/></x:attribute>
-		<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.2.0/build/node-menunav/assets/skins/sam/node-menunav.css"/>
+		<!--<x:variable name="accesskey" select="@accesskey"/>-->
 		<div class="yui3-menu-content">
-		<ul accesskey="@accesskey">
+		<ul>
 			<x:for-each select="*">
+				<x:variable name="pos" select="position()=1"/>
 				<li class="yui3-menuitem">
 					<x:choose>
 						<x:when test="local-name()='stop'">|</x:when>
 						<x:when test="count(item)">
 							<a class="yui3-menu-label" href="#{@name}">
+								<x:if test="position()=1">
+									<x:attribute name="accesskey"><x:value-of select="$accesskey"/></x:attribute>
+								</x:if>
 								<x:value-of select="$langdoc/menu/*[local-name()=current()/@name]"/>
 							</a>
 							<div id="{@name}" class="yui3-menu yui3-menu-hidden">
@@ -42,6 +46,9 @@
 						</x:when>
 						<x:otherwise>
 							<a class="yui3-menuitem-content" href="{@href}">
+								<x:if test="position()=1">
+									<x:attribute name="accesskey"><x:value-of select="$accesskey"/></x:attribute>
+								</x:if>
 								<x:value-of select="$langdoc/menu/*[local-name()=current()/@name]"/>
 							</a>
 						</x:otherwise>
