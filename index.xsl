@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<x:stylesheet xmlns:x="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<x:stylesheet xmlns:x="http://www.w3.org/1999/XSL/Transform"
+	version="1.0">
+
 	<x:output method="html" version="4.01" encoding="UTF-8"
 		doctype-public="-//W3C//DTD HTML 4.01//EN"
 		doctype-system="http://www.w3.org/TR/html4/strict.dtd"/>
-<!-- TODO some of these variables should be merged with others -->
+
+	<!-- TODO some of these variables should be merged with others -->
 	<x:variable name="doc" select="/list"/>
 	<x:variable name="lang" select="//object[@name='acf:lang']/@current"/>
-<!-- IE don't understand relative paths so domain MUST be predefined -->
+	<!-- IE don't understand relative paths so domain MUST be predefined -->
 	<x:variable name="domain" select="//object[@name='acf:appDetails']/@domain"/>
 	<!--<x:variable name="configdoc" select="document(concat($domain,'/xml/config.xml'))/config"/>-->
 	<!--<x:variable name="langdoc" select="document(concat($domain,'/texts/',$lang,'.xml'))/t"/>-->
@@ -215,7 +218,7 @@
 										<x:if test="count(@multiple)">
 											<x:attribute name="multiple">multiple</x:attribute>
 										</x:if>
-										<x:for-each select="$doc//object[@name=current()/@type]/*">
+										<x:for-each select="$doc//*[@name=current()/@type]/*">
 											<x:variable name="optionValue">
 												<x:choose>
 													<x:when test="count(@value)=1"><x:value-of select="@value"/></x:when>
@@ -224,10 +227,10 @@
 												</x:choose>
 											</x:variable>
 											<option value="{$optionValue}">
-											<x:if test="$value=@value">
-												<x:attribute name="selected">selected</x:attribute>
-											</x:if><x:value-of select="$langdoc//*[local-name()=current()/@ml]|name"/>
-											<!--<x:value-of select="current()/@ml"/>-->
+												<x:if test="$value=@value">
+													<x:attribute name="selected">selected</x:attribute>
+												</x:if>
+												<x:value-of select="$langdoc//*[local-name()=current()/@ml]|name"/>
 											</option>
 										</x:for-each>
 									</select>
@@ -244,10 +247,10 @@
 		</form>
 	</x:template>
 
-<!--
-	datasource is element with data for node
-	context is template schema
--->
+	<!--
+		datasource is element with data for node
+		context is template schema
+	-->
 	<x:template name="template">
 		<x:param name="datasource"/>
 		<x:choose>

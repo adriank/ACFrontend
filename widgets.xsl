@@ -19,14 +19,13 @@
 
 	<x:template match="widget[@type='menu']" mode="widget">
 		<x:attribute name="class">widget yui3-menu <x:value-of select="@class"/></x:attribute>
+		<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.2.0/build/node-menunav/assets/skins/sam/node-menunav.css"/>
 		<div class="yui3-menu-content">
 		<ul accesskey="@accesskey">
 			<x:for-each select="*">
 				<li class="yui3-menuitem">
 					<x:choose>
-						<x:when test="local-name()='stop'">
-							|
-						</x:when>
+						<x:when test="local-name()='stop'">|</x:when>
 						<x:when test="count(item)">
 							<a class="yui3-menu-label" href="#{@name}">
 								<x:value-of select="$langdoc/menu/*[local-name()=current()/@name]"/>
@@ -52,7 +51,6 @@
 		</ul>
 		</div>
 	</x:template>
-
 
 	<x:template match="widget[@type='paginate']" mode="widget">
 		<x:variable name="pars" select="$doc//*[local-name()=current()/@parsSource]"/>
@@ -168,7 +166,7 @@
 						<a class="edit" href="#permalink-{$datasource/permalink}"/>
 					</x:when>
 					<x:otherwise>
-						<a class="add" href="#permalink-{@permalink}"/>
+						<a class="add" href="#permalink-{@realm}"/>
 					</x:otherwise>
 				</x:choose>
 			</div>
