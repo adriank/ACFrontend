@@ -154,7 +154,7 @@
 	<x:template match="widget[@type='form']" mode="widget">
 		<x:param name="datasource" select="$doc//object[@name=current()/@datasource]"/>
 		<form action="{@action}" method="post" enctype="multipart/form-data">
-			<x:for-each select="item">
+			<x:for-each select="*">
 				<x:variable name="value">
 					<x:variable name="helper" select="$datasource/*[name()=current()/@name]"/>
 					<x:choose>
@@ -214,7 +214,7 @@
 									</div>
 								</x:when>
 								<x:otherwise>
-									<select name="{@name}" accesskey="{@accesskey}">
+									<select id="{@name}" name="{@name}" accesskey="{@accesskey}">
 										<x:if test="count(@multiple)">
 											<x:attribute name="multiple">multiple</x:attribute>
 										</x:if>
