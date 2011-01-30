@@ -19,7 +19,7 @@
 
 	<x:template match="widget[@type='menu']" mode="widget">
 		<x:attribute name="class">widget yui3-menu <x:value-of select="@class"/></x:attribute>
-		<!--<x:variable name="accesskey" select="@accesskey"/>-->
+		<x:variable name="accesskey" select="@accesskey"/>
 		<div class="yui3-menu-content">
 		<ul>
 			<x:for-each select="*">

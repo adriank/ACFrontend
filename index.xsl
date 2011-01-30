@@ -227,7 +227,7 @@
 												</x:choose>
 											</x:variable>
 											<option value="{$optionValue}">
-												<x:if test="$value=@value">
+												<x:if test="$optionValue=$value">
 													<x:attribute name="selected">selected</x:attribute>
 												</x:if>
 												<x:value-of select="$langdoc//*[local-name()=current()/@ml]|name"/>
