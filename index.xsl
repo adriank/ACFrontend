@@ -243,7 +243,9 @@
 					</x:otherwise>
 				</x:choose>
 			</x:for-each>
-			<input id="submit" name="submit" value="{$langdoc/submit/node()}" type="submit" accesskey="s"/>
+			<x:if test="@submit!='none'">
+				<input id="submit" name="submit" value="{$langdoc/submit/node()}" type="submit" accesskey="s"/>
+			</x:if>
 		</form>
 	</x:template>
 
