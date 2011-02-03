@@ -174,6 +174,11 @@
 					</x:choose>
 				</x:variable>
 				<x:choose>
+					<x:when test="local-name(.)='widget'">
+						<x:call-template name="widget">
+							<x:with-param name="datasource" select="@datasource"/>
+						</x:call-template>
+					</x:when>
 					<x:when test="local-name()='item' and @type='hidden'">
 						<input id="{@name}" type="{@type}" name="{@name}" value="{$value}"/>
 					</x:when>
