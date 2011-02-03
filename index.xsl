@@ -176,7 +176,7 @@
 				<x:choose>
 					<x:when test="local-name(.)='widget'">
 						<x:call-template name="widget">
-							<x:with-param name="datasource" select="@datasource"/>
+							<x:with-param name="datasource" select="$doc//*[@name=current()/@datasource]"/>
 						</x:call-template>
 					</x:when>
 					<x:when test="local-name()='item' and @type='hidden'">
