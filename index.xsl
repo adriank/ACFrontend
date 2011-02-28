@@ -9,7 +9,7 @@
 	<!-- TODO some of these variables should be merged with others -->
 	<x:variable name="doc" select="/list"/>
 	<x:variable name="lang" select="//object[@name='acf:lang']/@current"/>
-	<!-- IE don't understand relative paths so domain MUST be predefined -->
+	<!-- IE doesn't understand relative paths so domain MUST be predefined -->
 	<x:variable name="domain" select="//object[@name='acf:appDetails']/@domain"/>
 	<!--<x:variable name="configdoc" select="document(concat($domain,'/xml/config.xml'))/config"/>-->
 	<!--<x:variable name="langdoc" select="document(concat($domain,'/texts/',$lang,'.xml'))/t"/>-->
@@ -109,7 +109,7 @@
 				<x:if test="not(@subtag)">div</x:if>
 			</x:variable>
 			<x:choose>
-				<x:when test="local-name($datasource)='list'">
+				<x:when test="local-name($datasource)='list' and count($datasource/object)">
 					<x:attribute name="class">widget <x:value-of select="$type"/>-list <x:value-of select="@class"/></x:attribute>
 					<x:copy-of select="$before"/>
 					<x:variable name="this" select="."/>

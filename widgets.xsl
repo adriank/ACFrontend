@@ -167,7 +167,7 @@
 			<x:copy-of select="$langdoc//noArticle/node()"/>
 		</x:if>
 		<x:if test="$role='admin'">
-			<div class="accms-optionsPanel">
+			<div class="yui3-cssreset accms-optionsPanel">
 				<x:choose>
 					<x:when test="$datasource/permalink">
 						<a class="edit" href="#permalink-{$datasource/permalink}"/>
