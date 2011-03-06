@@ -8,16 +8,16 @@
 
 	<!-- TODO some of these variables should be merged with others -->
 	<x:variable name="doc" select="/list"/>
-	<x:variable name="lang" select="//object[@name='acf:lang']/@current"/>
+	<x:variable name="lang" select="//object[@name='acr:lang']/@current"/>
 	<!-- IE doesn't understand relative paths so domain MUST be predefined -->
-	<x:variable name="domain" select="//object[@name='acf:appDetails']/@domain"/>
+	<x:variable name="domain" select="//object[@name='acr:appDetails']/@domain"/>
 	<!--<x:variable name="configdoc" select="document(concat($domain,'/xml/config.xml'))/config"/>-->
 	<!--<x:variable name="langdoc" select="document(concat($domain,'/texts/',$lang,'.xml'))/t"/>-->
-	<x:variable name="config" select="//object[@name='acf:appDetails']/@config"/>
+	<x:variable name="config" select="//object[@name='acr:appDetails']/@config"/>
 	<x:variable name="configdoc" select="document(concat('','../xml/',$config,'.xml'))/config"/>
 	<x:variable name="langdoc" select="document(concat('../texts/',$lang,'.xml'))/t"/>
 	<x:variable name="static" select="$configdoc/staticdomain/node()"/>
-	<x:variable name="role" select="$doc/object[@name='acf:user']/@role"/>
+	<x:variable name="role" select="$doc/object[@name='acr:user']/@role"/>
 	<x:variable name="layoutdoc" select="//object[@name='layout']"/>
 	<x:include href="widgets.xsl"/>
 
