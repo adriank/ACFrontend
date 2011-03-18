@@ -84,6 +84,7 @@
 			</x:if>
 		</x:if>
 	</x:template>
+
 	<x:template match="widget[@type='selectLang']" mode="widget">
 		<ul>
 			<x:for-each select="$doc/object[@name='acf:lang']/*">
@@ -100,6 +101,7 @@
 			</x:for-each>
 		</ul>
 	</x:template>
+
 	<x:template match="widget[@type='siteMap']" mode="widget">
 		<x:variable name="datasource" select="$doc//*[local-name()=current()/@datasource]"/>
 		<x:variable name="width" select="99.9 div count($datasource/category)"/>
@@ -125,6 +127,7 @@
 			</div>
 		</div>
 	</x:template>
+
 	<x:template match="widget[@type='debug']" mode="widget">
 		<x:if test="count($doc/debug)">
 			<h1>Debug information</h1>
@@ -181,6 +184,23 @@
 		<x:call-template name="templateWidget">
 			<x:with-param name="datasource" select="$datasource"/>
 		</x:call-template>
+	</x:template>
+
+	<x:template match="widget[@type='text']" mode="widget">
+		<x:param name="datasource" select="@datasource"/>
+		<x:if test="not($datasource)">
+			<x:copy-of select="$langdoc//noPage/node()"/>
+		</x:if>
+		<x:if test="$role='admin'">
+			<div class="yui3-cssreset accms-optionsPanel">
+				<a class="edit" href="#permalink-{$datasource/_id}/{@item}"/>
+			</div>
+		</x:if>
+		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
+		<x:value-of select="$text"/>
+		<x:if test="not($text)">
+			<x:copy-of select="$langdoc//noText/node()"/>
+		</x:if>
 	</x:template>
 
 </x:stylesheet>
