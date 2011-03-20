@@ -197,7 +197,7 @@
 			</div>
 		</x:if>
 		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
-		<x:value-of select="$text"/>
+		<x:copy-of select="$text/node()"/>
 		<x:if test="not($text)">
 			<x:copy-of select="$langdoc//noText/node()"/>
 		</x:if>

@@ -11,8 +11,6 @@
 	<x:variable name="lang" select="//object[@name='acr:lang']/@current"/>
 	<!-- IE doesn't understand relative paths so domain MUST be predefined -->
 	<x:variable name="domain" select="//object[@name='acr:appDetails']/@domain"/>
-	<!--<x:variable name="configdoc" select="document(concat($domain,'/xml/config.xml'))/config"/>-->
-	<!--<x:variable name="langdoc" select="document(concat($domain,'/texts/',$lang,'.xml'))/t"/>-->
 	<x:variable name="config" select="//object[@name='acr:appDetails']/@config"/>
 	<x:variable name="configdoc" select="document(concat('','../xml/',$config,'.xml'))/config"/>
 	<x:variable name="langdoc" select="document(concat('../texts/',$lang,'.xml'))/t"/>
@@ -194,6 +192,9 @@
 											<x:value-of select="@name"/>
 										</x:otherwise>
 									</x:choose>
+									<x:if test="@required='true'">
+										<span class="required"> *</span>
+									</x:if>
 								</label>
 							</x:if>
 							<x:choose>
