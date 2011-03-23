@@ -193,7 +193,7 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<a class="edit" href="#permalink-{$datasource/_id}/{@item}"/>
+				<a class="edit" href="#permalink-{$datasource/_id}/{@item}/{$doc/*[@name='acr:view']/@path}"/>
 			</div>
 		</x:if>
 		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
