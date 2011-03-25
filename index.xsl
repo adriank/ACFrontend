@@ -49,6 +49,9 @@
 			</x:for-each>
 			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.2.0/build/yui/yui-min.js&amp;3.2.0/build/loader/loader-min.js"></script>
 			<script type="text/javascript" src="/js/init.js"/>
+			<x:if test="$doc//item[@type='richText']">
+				<script type="text/javascript" src="/js/richText.js"/>
+			</x:if>
 			<script type="text/javascript"><x:value-of select="$doc//*[@name='layout']/script"/></script>
 		</head>
 		<body>
@@ -204,8 +207,8 @@
 								<x:when test="@type='textarea'">
 									<textarea id="{@name}" name="{@name}" accesskey="{@accesskey}"><x:copy-of select="$value"/></textarea>
 								</x:when>
-								<x:when test="@type='RTE'">
-									<textarea id="{@name}" name="{@name}" accesskey="{@accesskey}" class="accms-RTE"><x:value-of select="$value"/></textarea>
+								<x:when test="@type='richText'">
+									<textarea id="{@name}" name="{@name}" accesskey="{@accesskey}" class="richText"><x:value-of select="$value"/></textarea>
 								</x:when>
 								<x:when test="@type='checkbox'">
 									<input id="{@name}" type="checkbox" name="{@name}" value="true" accesskey="{@accesskey}">

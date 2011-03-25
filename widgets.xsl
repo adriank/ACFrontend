@@ -11,7 +11,7 @@
 
 	<x:template name="menu">
 		<li class="yui3-menuitem">
-			<a class="yui3-menuitem-content" href="{@href}">
+			<a class="yui3-menuitem-content" href="{@url}">
 				<x:value-of select="$langdoc/menu/*[local-name()=current()/@name]"/>
 			</a>
 		</li>
@@ -45,7 +45,7 @@
 							</div>
 						</x:when>
 						<x:otherwise>
-							<a class="yui3-menuitem-content" href="{@href}">
+							<a class="yui3-menuitem-content" href="{@url}">
 								<x:if test="position()=1">
 									<x:attribute name="accesskey"><x:value-of select="$accesskey"/></x:attribute>
 								</x:if>
@@ -199,6 +199,24 @@
 		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:copy-of select="$text/node()"/>
 		<x:if test="not($text)">
+			<x:copy-of select="$langdoc//noText/node()"/>
+		</x:if>
+	</x:template>
+
+	<x:template match="widget[@type='richText']" mode="widget">
+		<x:param name="datasource" select="@datasource"/>
+		<x:if test="not($datasource)">
+			<x:copy-of select="$langdoc//noPage/node()"/>
+		</x:if>
+		<x:if test="$role='admin'">
+			<div class="yui3-cssreset accms-optionsPanel">
+				<a class="edit" href="#permalink-{$datasource/_id}/{@item}/{$doc/*[@name='acr:view']/@path}"/>
+			</div>
+		</x:if>
+
+		<x:variable name="richText" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
+		<x:copy-of select="$richText/node()"/>
+		<x:if test="not($richText)">
 			<x:copy-of select="$langdoc//noText/node()"/>
 		</x:if>
 	</x:template>
