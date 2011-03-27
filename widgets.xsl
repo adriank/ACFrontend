@@ -193,7 +193,7 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<a class="edit" href="#permalink-{$datasource/_id}/{@item}/{$doc/*[@name='acr:view']/@path}"/>
+				<a class="edit" href="#link-{$datasource/_id}/{@item}/{$doc/*[@name='acr:view']/@path},{@item}"/>
 			</div>
 		</x:if>
 		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
@@ -210,14 +210,14 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<a class="edit" href="#permalink-{$datasource/_id}/{@item}/{$doc/*[@name='acr:view']/@path}"/>
+				<a class="edit" href="#link-{$datasource/_id}/{@item}/{$doc/*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
 			</div>
 		</x:if>
 
 		<x:variable name="richText" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:copy-of select="$richText/node()"/>
 		<x:if test="not($richText)">
-			<x:copy-of select="$langdoc//noText/node()"/>
+			 <x:copy-of select="$langdoc//noText/node()"/>
 		</x:if>
 	</x:template>
 

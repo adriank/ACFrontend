@@ -7,7 +7,7 @@
 		doctype-system="http://www.w3.org/TR/html4/strict.dtd"/>
 
 	<!-- TODO some of these variables should be merged with others -->
-	<x:variable name="doc" select="/list"/>
+	<x:variable name="doc" select="/list//*"/>
 	<x:variable name="lang" select="//object[@name='acr:lang']/@current"/>
 	<!-- IE doesn't understand relative paths so domain MUST be predefined -->
 	<x:variable name="domain" select="//object[@name='acr:appDetails']/@domain"/>
