@@ -7,7 +7,7 @@
 		doctype-system="http://www.w3.org/TR/html4/strict.dtd"/>
 
 	<!-- TODO some of these variables should be merged with others -->
-	<x:variable name="doc" select="/list//*"/>
+	<!--<x:variable name="doc" select="/list//*"/>-->
 	<x:variable name="lang" select="//object[@name='acr:lang']/@current"/>
 	<!-- IE doesn't understand relative paths so domain MUST be predefined -->
 	<x:variable name="domain" select="//object[@name='acr:appDetails']/@domain"/>
@@ -15,7 +15,7 @@
 	<x:variable name="configdoc" select="document(concat('','../xml/',$config,'.xml'))/config"/>
 	<x:variable name="langdoc" select="document(concat('../texts/',$lang,'.xml'))/t"/>
 	<x:variable name="static" select="$configdoc/staticdomain/node()"/>
-	<x:variable name="role" select="$doc/object[@name='acr:user']/@role"/>
+	<x:variable name="role" select="//object[@name='acr:user']/@role"/>
 	<x:variable name="layoutdoc" select="//object[@name='layout']"/>
 	<x:include href="widgets.xsl"/>
 
@@ -44,21 +44,21 @@
 			<link rel="stylesheet" type="text/css" href="http://e.acimg.eu/css/yui-rf.css"/>
 			<link href="http://e.acimg.eu/css/grids.css" rel="stylesheet" type="text/css"/>
 			<link href="{$static}css/style.css" rel="stylesheet" type="text/css"/>
-			<x:for-each select="$doc//style">
+			<x:for-each select="//style">
 				<link href="{@url}" rel="stylesheet" type="text/css"/>
 			</x:for-each>
 			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.2.0/build/yui/yui-min.js&amp;3.2.0/build/loader/loader-min.js"></script>
 			<script type="text/javascript" src="/js/init.js"/>
-			<x:if test="$doc//item[@type='richText']">
+			<x:if test="//item[@type='richText']">
 				<script type="text/javascript" src="/js/richText.js"/>
 			</x:if>
-			<script type="text/javascript"><x:value-of select="$doc//*[@name='layout']/script"/></script>
+			<script type="text/javascript"><x:value-of select="//*[@name='layout']/script"/></script>
 		</head>
 		<body>
 			<x:apply-templates select="$layoutdoc"/>
-			<x:if test="count($doc/object[@name='GlobalError'])">
-				<h1>GlobalError <x:value-of select="$doc/object[@name='GlobalError']/@error"/></h1>
-				<x:copy-of select="$doc/object[@name='GlobalError']/node()"/>
+			<x:if test="count(//object[@name='GlobalError'])">
+				<h1>GlobalError <x:value-of select="//object[@name='GlobalError']/@error"/></h1>
+				<x:copy-of select="//object[@name='GlobalError']/node()"/>
 			</x:if>
 		</body>
 		</html>
@@ -86,7 +86,7 @@
 
 	<x:template match="script|pagetitle|style"/>
 	<x:template match="widget" name="widget">
-		<x:param name="datasource" select="$doc/*[@name=current()/@datasource]"/>
+		<x:param name="datasource" select="//*[@name=current()/@datasource]"/>
 		<x:variable name="tag">
 			<x:value-of select="@tag"/>
 			<x:if test="not(@tag)">div</x:if>
@@ -160,7 +160,7 @@
 					<x:variable name="helper" select="$datasource/*[name()=current()/@name]"/>
 					<x:choose>
 						<x:when test="@value">
-							<x:copy-of select="$doc//object[@name=current()/@value]/node()"/>
+							<x:copy-of select="//object[@name=current()/@value]/node()"/>
 						</x:when>
 						<x:when test="count(node())">
 							<x:for-each select="node()">
@@ -177,7 +177,7 @@
 				<x:choose>
 					<x:when test="local-name(.)='widget'">
 						<x:call-template name="widget">
-							<x:with-param name="datasource" select="$doc//*[@name=current()/@datasource]"/>
+							<x:with-param name="datasource" select="//*[@name=current()/@datasource]"/>
 						</x:call-template>
 					</x:when>
 					<x:when test="local-name()='item' and @type='hidden'">
@@ -227,7 +227,7 @@
 										<x:if test="count(@multiple)">
 											<x:attribute name="multiple">multiple</x:attribute>
 										</x:if>
-										<x:for-each select="$doc//*[@name=current()/@type]/*">
+										<x:for-each select="//*[@name=current()/@type]/*">
 											<x:variable name="optionValue">
 												<x:choose>
 													<x:when test="count(@value)=1"><x:value-of select="@value"/></x:when>

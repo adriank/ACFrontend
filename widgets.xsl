@@ -5,7 +5,7 @@
 	<x:template match="widget[@type='notFound']" mode="widget">
 		<x:copy-of select="$langdoc/notFound/node()"/><br/>
 		<x:if test="$role='admin'">
-			<a href="/admin-new_view/{$doc//view/@name}"><x:value-of select="$langdoc//notFoundAdmin"/></a>
+			<a href="/admin-new_view/{//view/@name}"><x:value-of select="$langdoc//notFoundAdmin"/></a>
 		</x:if>
 	</x:template>
 
@@ -60,37 +60,37 @@
 	</x:template>
 
 	<x:template match="widget[@type='paginate']" mode="widget">
-		<x:variable name="pars" select="$doc//*[local-name()=current()/@parsSource]"/>
+		<x:variable name="pars" select="//*[local-name()=current()/@parsSource]"/>
 		<x:variable name="offset" select="$pars/offset/node()"/>
 		<x:variable name="limit" select="$pars/limit/node()"/>
 		<x:variable name="q" select="$pars/quantity/node()"/>
 		<x:variable name="pages" select="ceiling($q div $limit)+1"/>
 		<x:if test="$limit &lt; $q">
 			<x:if test="$offset+1 &gt; $limit">
-				<span class="previous"><a href="/{$doc//view/@name}/{$offset -$limit}/{$limit}"><x:value-of select="$langdoc//previousPage/node()"/></a></span>
+				<span class="previous"><a href="/{//view/@name}/{$offset -$limit}/{$limit}"><x:value-of select="$langdoc//previousPage/node()"/></a></span>
 			</x:if>
-			<x:for-each select="($doc//node()|$doc//@*)[position() &lt; $pages]">
+			<x:for-each select="(//node()|//@*)[position() &lt; $pages]">
 				<x:choose>
 					<x:when test="position()=floor($offset div $limit)+1">
 						<span class="current"><x:value-of select="position()"/></span>
 					</x:when>
 					<x:otherwise>
-						<a class="number" href="/{$doc//view/@name}/{(position()-1)*$limit}/{$limit}"><x:value-of select="position()"/></a>
+						<a class="number" href="/{//view/@name}/{(position()-1)*$limit}/{$limit}"><x:value-of select="position()"/></a>
 					</x:otherwise>
 				</x:choose>
 			</x:for-each>
 			<x:if test="$q - $offset &gt; $limit">
-				<span class="next"><a href="/{$doc//view/@name}/{$offset+$limit}/{$limit}"><x:value-of select="$langdoc/nextPage/node()"/></a></span>
+				<span class="next"><a href="/{//view/@name}/{$offset+$limit}/{$limit}"><x:value-of select="$langdoc/nextPage/node()"/></a></span>
 			</x:if>
 		</x:if>
 	</x:template>
 
 	<x:template match="widget[@type='selectLang']" mode="widget">
 		<ul>
-			<x:for-each select="$doc/object[@name='acf:lang']/*">
+			<x:for-each select="//object[@name='acf:lang']/*">
 				<li>
 					<x:choose>
-						<x:when test="local-name()=$doc/object[@name='acf:lang']/@current">
+						<x:when test="local-name()=//object[@name='acf:lang']/@current">
 							<img alt="{local-name()}" src="http://e.acimg.eu/flags/{local-name()}.png"/>
 						</x:when>
 						<x:otherwise>
@@ -103,7 +103,7 @@
 	</x:template>
 
 	<x:template match="widget[@type='siteMap']" mode="widget">
-		<x:variable name="datasource" select="$doc//*[local-name()=current()/@datasource]"/>
+		<x:variable name="datasource" select="//*[local-name()=current()/@datasource]"/>
 		<x:variable name="width" select="99.9 div count($datasource/category)"/>
 		<x:for-each select="$datasource/category">
 			<div class="block" style="width:{$width}%;">
@@ -129,17 +129,17 @@
 	</x:template>
 
 	<x:template match="widget[@type='debug']" mode="widget">
-		<x:if test="count($doc/debug)">
+		<x:if test="count(//debug)">
 			<h1>Debug information</h1>
 			<h2>Execution Log</h2>
 			<table>
 				<thead><td>Severity</td><td>Origin</td><td>File</td><td>Message</td></thead>
-				<x:for-each select="$doc/debug/executionLog/item">
+				<x:for-each select="//debug/executionLog/item">
 					<tr class="{@level}"><td><x:value-of select="@level"/></td><td><x:value-of select="@origin"/></td><td><x:value-of select="@file"/>[<x:value-of select="@line"/>]</td><td><x:value-of select="message"/></td></tr>
 				</x:for-each>
 			</table>
 			<h2>Info</h2>
-			<div class="info"><x:copy-of select="$doc/debug/info"/></div>
+			<div class="info"><x:copy-of select="//debug/info"/></div>
 		</x:if>
 	</x:template>
 
@@ -193,7 +193,7 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<a class="edit" href="#link-{$datasource/_id}/{@item}/{$doc/*[@name='acr:view']/@path},{@item}"/>
+				<a class="edit" href="#link-{$datasource/_id}/{@item}/{//*[@name='acr:view']/@path},{@item}"/>
 			</div>
 		</x:if>
 		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
@@ -210,7 +210,7 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<a class="edit" href="#link-{$datasource/_id}/{@item}/{$doc/*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
+				<a class="edit" href="#link-{$datasource/_id}/{@item}/{//*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
 			</div>
 		</x:if>
 
