@@ -86,7 +86,7 @@
 
 	<x:template match="script|pagetitle|style"/>
 	<x:template match="widget" name="widget">
-		<x:param name="datasource" select="//*[@name=current()/@datasource]"/>
+		<x:param name="datasource" select="(//object|//list)[@name=current()/@datasource]"/>
 		<x:variable name="tag">
 			<x:value-of select="@tag"/>
 			<x:if test="not(@tag)">div</x:if>
