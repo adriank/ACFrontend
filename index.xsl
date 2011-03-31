@@ -239,7 +239,7 @@
 												<x:if test="$optionValue=$value">
 													<x:attribute name="selected">selected</x:attribute>
 												</x:if>
-												<x:value-of select="$langdoc//*[local-name()=current()/@ml]|name"/>
+												<x:value-of select="$langdoc//*[local-name()=current()/@ml]|name|@name"/>
 											</option>
 										</x:for-each>
 									</select>
