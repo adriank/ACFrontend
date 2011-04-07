@@ -47,7 +47,7 @@
 			<x:for-each select="//style">
 				<link href="{@url}" rel="stylesheet" type="text/css"/>
 			</x:for-each>
-			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.2.0/build/yui/yui-min.js&amp;3.2.0/build/loader/loader-min.js"></script>
+			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.3.0/build/yui/yui-min.js&amp;3.3.0/build/loader/loader-min.js"></script>
 			<script type="text/javascript" src="/js/init.js"/>
 			<x:for-each select="//script[@url]">
 				<script type="text/javascript" src="{@url}"/>
