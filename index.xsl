@@ -153,7 +153,7 @@
 	</x:template>
 	<!-- TODO add required fields support -->
 	<x:template match="widget[@type='form']" mode="widget">
-		<x:param name="datasource" select="$doc//object[@name=current()/@datasource]"/>
+		<x:param name="datasource" select="//object[@name=current()/@datasource]"/>
 		<form action="{@action}" method="post" enctype="multipart/form-data">
 			<x:for-each select="*">
 				<x:variable name="value">
