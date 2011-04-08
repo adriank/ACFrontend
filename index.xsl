@@ -47,12 +47,15 @@
 			<x:for-each select="//style">
 				<link href="{@url}" rel="stylesheet" type="text/css"/>
 			</x:for-each>
-			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.2.0/build/yui/yui-min.js&amp;3.2.0/build/loader/loader-min.js"></script>
+			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.3.0/build/yui/yui-min.js&amp;3.3.0/build/loader/loader-min.js"></script>
 			<script type="text/javascript" src="/js/init.js"/>
+			<x:for-each select="//script[@url]">
+				<script type="text/javascript" src="{@url}"/>
+			</x:for-each>
 			<x:if test="//item[@type='richText']">
 				<script type="text/javascript" src="/js/richText.js"/>
 			</x:if>
-			<script type="text/javascript"><x:value-of select="//*[@name='layout']/script"/></script>
+			<script type="text/javascript"><x:value-of select="//*[@name='layout']/script/node()"/></script>
 		</head>
 		<body>
 			<x:apply-templates select="$layoutdoc"/>
