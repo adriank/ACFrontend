@@ -216,7 +216,7 @@
 
 		<x:variable name="richText" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:copy-of select="$richText/node()"/>
-		<x:if test="not($richText)">
+		<x:if test="$role='admin' and not($richText)">
 			 <x:copy-of select="$langdoc//noText/node()"/>
 		</x:if>
 	</x:template>
