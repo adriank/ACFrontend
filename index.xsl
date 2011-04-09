@@ -59,9 +59,9 @@
 		</head>
 		<body>
 			<x:apply-templates select="$layoutdoc"/>
-			<x:if test="count(//object[@name='GlobalError'])">
-				<h1>GlobalError <x:value-of select="//object[@name='GlobalError']/@error"/></h1>
-				<x:copy-of select="//object[@name='GlobalError']/node()"/>
+			<x:if test="count(//object[@name='acr:globalError'])">
+				<h1>GlobalError <x:value-of select="//object[@name='acr:globalError']/@error"/></h1>
+				<x:value-of select="//object[@name='acr:globalError']/@message"/>
 			</x:if>
 		</body>
 		</html>
