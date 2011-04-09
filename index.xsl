@@ -154,6 +154,7 @@
 	<x:template match="access">
 		<a href="#" accesskey="{@key}"/>
 	</x:template>
+
 	<!-- TODO add required fields support -->
 	<x:template match="widget[@type='form']" mode="widget">
 		<x:param name="datasource" select="//object[@name=current()/@datasource]"/>
@@ -190,12 +191,13 @@
 						<div class="item">
 							<x:if test="count(@label)=0 or @label='enabled'">
 								<label for="{@name}">
+									<x:variable name="ml" select="$langdoc//*[local-name()=current()/@ml]"/>
 									<x:choose>
-										<x:when test="count(@ml)">
-											<x:value-of select="$langdoc//*[local-name()=current()/@ml]"/>
+										<x:when test="count($ml)">
+											<x:value-of select="$ml"/>
 										</x:when>
 										<x:otherwise>
-											<x:value-of select="@name"/>
+											ml.<x:value-of select="@name"/>
 										</x:otherwise>
 									</x:choose>
 									<x:if test="@required='true'">
@@ -297,11 +299,9 @@
 									</x:call-template>
 								</x:for-each>
 							</x:variable>
-							<!--<x:value-of select="translate($temp, ' ', '_')"/>-->
 							<x:value-of select="$temp"/>
 						</x:attribute>
 					</x:for-each>
-					<!-- changed node() -> text()|* -->
 					<x:for-each select="text()|*[local-name()!='pars']">
 						<x:call-template name="template">
 							<x:with-param name="datasource" select="$datasource"/>
