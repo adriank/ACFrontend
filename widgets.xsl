@@ -60,10 +60,9 @@
 	</x:template>
 
 	<x:template match="widget[@type='paginate']" mode="widget">
-		<x:variable name="pars" select="//*[local-name()=current()/@parsSource]"/>
-		<x:variable name="offset" select="$pars/offset/node()"/>
-		<x:variable name="limit" select="$pars/limit/node()"/>
-		<x:variable name="q" select="$pars/quantity/node()"/>
+		<x:variable name="offset" select="@offset"/>
+		<x:variable name="limit" select="@limit"/>
+		<x:variable name="q" select="@quantity"/>
 		<x:variable name="pages" select="ceiling($q div $limit)+1"/>
 		<x:if test="$limit &lt; $q">
 			<x:if test="$offset+1 &gt; $limit">
@@ -75,12 +74,12 @@
 						<span class="current"><x:value-of select="position()"/></span>
 					</x:when>
 					<x:otherwise>
-						<a class="number" href="/{//view/@name}/{(position()-1)*$limit}/{$limit}"><x:value-of select="position()"/></a>
+						<a class="number" href="/{//object[@name='acr:view']/@path}/{(position()-1)*$limit}/{$limit}"><x:value-of select="position()"/></a>
 					</x:otherwise>
 				</x:choose>
 			</x:for-each>
 			<x:if test="$q - $offset &gt; $limit">
-				<span class="next"><a href="/{//view/@name}/{$offset+$limit}/{$limit}"><x:value-of select="$langdoc/nextPage/node()"/></a></span>
+				<span class="next"><a href="/{//object[@name='acr:view']/@path}/{$offset+$limit}/{$limit}"><x:value-of select="$langdoc/nextPage/node()"/></a></span>
 			</x:if>
 		</x:if>
 	</x:template>
@@ -210,7 +209,11 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<a class="edit" href="#link-{$datasource/_id}/{@item}/{//*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
+				<x:variable name="page">
+					<x:value-of select="$datasource/_id"/>
+					<x:if test="not($datasource/_id)">_</x:if>
+				</x:variable>
+				<a class="edit" href="#link-{$page}/{@item}/{//*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
 			</div>
 		</x:if>
 

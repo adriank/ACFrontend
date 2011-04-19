@@ -78,11 +78,11 @@
 	</x:template>
 
 	<x:template match="column">
-		<x:variable name="type">
-			<x:value-of select="@type"/>
-			<x:if test="not(@type)">last</x:if>
+		<x:variable name="width">
+			<x:value-of select="@width"/>
+			<x:if test="not(@width)">last</x:if>
 		</x:variable>
-		<div class="column {$type} {@name}">
+		<div class="column {$width} {@name}">
 			<x:apply-templates select="./*"/>
 		</div>
 	</x:template>
@@ -193,7 +193,7 @@
 								<label for="{@name}">
 									<x:variable name="ml" select="$langdoc//*[local-name()=current()/@ml]"/>
 									<x:choose>
-										<x:when test="count($ml)">
+										<x:when test="$ml">
 											<x:value-of select="$ml"/>
 										</x:when>
 										<x:otherwise>
