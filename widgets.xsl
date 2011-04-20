@@ -192,7 +192,11 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<a class="edit" href="#link-{$datasource/_id}/{@item}/{//*[@name='acr:view']/@path},{@item}"/>
+				<x:variable name="page">
+					<x:value-of select="$datasource/pageName"/>
+					<x:if test="not($datasource/pageName)">_</x:if>
+				</x:variable>
+				<a class="edit" href="#link-{$page}/{@item}/{//*[@name='acr:view']/@path},{@item}"/>
 			</div>
 		</x:if>
 		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
@@ -210,8 +214,8 @@
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
 				<x:variable name="page">
-					<x:value-of select="$datasource/_id"/>
-					<x:if test="not($datasource/_id)">_</x:if>
+					<x:value-of select="$datasource/pageName"/>
+					<x:if test="not($datasource/pageName)">_</x:if>
 				</x:variable>
 				<a class="edit" href="#link-{$page}/{@item}/{//*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
 			</div>
