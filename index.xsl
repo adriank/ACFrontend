@@ -196,8 +196,11 @@
 										<x:when test="$ml">
 											<x:value-of select="$ml"/>
 										</x:when>
+										<x:when test="not($ml) and @ml">
+											ml.<x:value-of select="@ml"/>
+										</x:when>
 										<x:otherwise>
-											ml.<x:value-of select="@name"/>
+											ml attribute was not set for <b><x:value-of select="@name"/></b>
 										</x:otherwise>
 									</x:choose>
 									<x:if test="@required='true'">
