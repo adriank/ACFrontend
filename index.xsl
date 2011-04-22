@@ -134,23 +134,30 @@
 							<x:apply-templates mode="widget" select="$this">
 								<x:with-param name="datasource" select="."/>
 							</x:apply-templates>
+							<x:if test="$this/@mode='tree' and ./*[@name=$this/@childName]/node()">
+								<x:variable name="data" select="*[@name=$this/@childName]"/>
+								<x:for-each select="$this">ddd
+									<x:call-template name="widget">
+										<x:with-param name="datasource" select="$data"/>
+									</x:call-template>
+								</x:for-each>
+							</x:if>
 						</x:element>
 					</x:for-each>
 				</x:when>
-				<x:when test="$datasource/node() or not(@showEmpty='false')">
+				<x:when test="not(@datasource) or $datasource/node() or @showEmpty='false' or @type='form'">
 					<x:attribute name="class">widget <x:value-of select="$type"/>-item <x:value-of select="@class"/></x:attribute>
 					<x:copy-of select="$before"/>
 					<x:apply-templates mode="widget" select=".">
 						<x:with-param name="datasource" select="$datasource"/>
 					</x:apply-templates>
-					<x:if test="@mode='tree'">
-						<!--<x:copy-of select=""/>-->
+					<x:if test="@mode='tree' and $datasource/*[@name=current()/@childName]/node()">
 						<x:call-template name="widget">
-							<x:with-param name="datasource" select="$datasource/list|$datasource/object"/>
+							<x:with-param name="datasource" select="$datasource/*[@name=current()/@childName]"/>
 						</x:call-template>
 					</x:if>
 				</x:when>
-				<x:otherwise>nodata TODO make customization possible <x:value-of select="$langdoc//*[local-name()='noData']"/></x:otherwise>
+				<!--<x:otherwise>nodata TODO make customization possible <x:value-of select="$langdoc//*[local-name()='noData']"/></x:otherwise>-->
 			</x:choose>
 
 			<x:for-each select="after/node()">
