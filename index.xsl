@@ -96,13 +96,15 @@
 		</x:variable>
 		<x:element name="{$tag}">
 			<x:attribute name="id"><x:value-of select="@name"/></x:attribute>
+
 			<x:variable name="before">
 				<x:for-each select="before/node()">
 					<x:call-template name="template">
-						<x:with-param name="datasource" select="."/>
+						<x:with-param name="datasource" select="$datasource"/>
 					</x:call-template>
 				</x:for-each>
 			</x:variable>
+
 			<x:variable name="type">
 				<x:value-of select="@type"/>
 				<x:if test="not(@type)">template</x:if>
@@ -112,6 +114,7 @@
 				<x:value-of select="@subtag"/>
 				<x:if test="not(@subtag)">div</x:if>
 			</x:variable>
+
 			<x:choose>
 				<x:when test="local-name($datasource)='list' and count($datasource/object)">
 					<x:attribute name="class">widget <x:value-of select="$type"/>-list <x:value-of select="@class"/></x:attribute>
@@ -134,13 +137,20 @@
 						</x:element>
 					</x:for-each>
 				</x:when>
-				<x:otherwise>
+				<x:when test="$datasource/node() or not(@showEmpty='false')">
 					<x:attribute name="class">widget <x:value-of select="$type"/>-item <x:value-of select="@class"/></x:attribute>
 					<x:copy-of select="$before"/>
 					<x:apply-templates mode="widget" select=".">
 						<x:with-param name="datasource" select="$datasource"/>
 					</x:apply-templates>
-				</x:otherwise>
+					<x:if test="@mode='tree'">
+						<!--<x:copy-of select=""/>-->
+						<x:call-template name="widget">
+							<x:with-param name="datasource" select="$datasource/list|$datasource/object"/>
+						</x:call-template>
+					</x:if>
+				</x:when>
+				<x:otherwise>nodata TODO make customization possible <x:value-of select="$langdoc//*[local-name()='noData']"/></x:otherwise>
 			</x:choose>
 
 			<x:for-each select="after/node()">
@@ -277,7 +287,7 @@
 				<x:copy-of select="$langdoc//*[local-name()=current()/@name]/node()"/>
 			</x:when>
 			<x:when test="local-name(.)='node'">
-				<x:copy-of select="$datasource//*[local-name()=current()/@name]/node()"/>
+				<x:copy-of select="$datasource/*[local-name()=current()/@name]/node()"/>
 			</x:when>
 			<x:when test="local-name(.)='attr'">
 				<x:value-of select="$datasource/@*[local-name()=current()/@name]"/>
