@@ -136,7 +136,7 @@
 							</x:apply-templates>
 							<x:if test="$this/@mode='tree' and ./*[@name=$this/@childName]/node()">
 								<x:variable name="data" select="*[@name=$this/@childName]"/>
-								<x:for-each select="$this">ddd
+								<x:for-each select="$this">
 									<x:call-template name="widget">
 										<x:with-param name="datasource" select="$data"/>
 									</x:call-template>
