@@ -145,7 +145,7 @@
 						</x:element>
 					</x:for-each>
 				</x:when>
-				<x:when test="not(@datasource) or $datasource/node() or @showEmpty='false' or @type='form'">
+				<x:when test="not(@datasource) or $datasource/node() or @showEmpty='true' or @type='form'">
 					<x:attribute name="class">widget <x:value-of select="$type"/>-item <x:value-of select="@class"/></x:attribute>
 					<x:copy-of select="$before"/>
 					<x:apply-templates mode="widget" select=".">
