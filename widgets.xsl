@@ -190,6 +190,7 @@
 		<x:if test="not($datasource)">
 			<x:copy-of select="$langdoc//noPage/node()"/>
 		</x:if>
+		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
 <!--				<x:variable name="page">
@@ -202,7 +203,6 @@
 				<x:copy-of select="$langdoc//noText/node()"/>
 			</x:if>
 		</x:if>
-		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:copy-of select="$text/node()"/>
 	</x:template>
 
@@ -211,6 +211,7 @@
 		<x:if test="not($datasource)">
 			<x:copy-of select="$langdoc//noPage/node()"/>
 		</x:if>
+		<x:variable name="richText" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
 <!--				<x:variable name="page">
@@ -223,8 +224,6 @@
 				<x:copy-of select="$langdoc//noText/node()"/>
 			</x:if>
 		</x:if>
-
-		<x:variable name="richText" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:copy-of select="$richText/node()"/>
 	</x:template>
 
