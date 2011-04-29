@@ -192,18 +192,18 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<x:variable name="page">
+<!--				<x:variable name="page">
 					<x:value-of select="$datasource/pageName"/>
 					<x:if test="not($datasource/pageName)">_</x:if>
-				</x:variable>
-				<a class="edit" href="#link-{$page}/{@item}/{//*[@name='acr:view']/@path},{@item}"/>
+				</x:variable>-->
+				<a class="edit" href="#link-{$datasource/pageName}/{@item}/{//*[@name='acr:view']/@path},{@item}"/>
 			</div>
+			<x:if test="not($text)">
+				<x:copy-of select="$langdoc//noText/node()"/>
+			</x:if>
 		</x:if>
 		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:copy-of select="$text/node()"/>
-		<x:if test="not($text)">
-			<x:copy-of select="$langdoc//noText/node()"/>
-		</x:if>
 	</x:template>
 
 	<x:template match="widget[@type='richText']" mode="widget">
@@ -213,19 +213,19 @@
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<x:variable name="page">
+<!--				<x:variable name="page">
 					<x:value-of select="$datasource/pageName"/>
 					<x:if test="not($datasource/pageName)">_</x:if>
-				</x:variable>
-				<a class="edit" href="#link-{$page}/{@item}/{//*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
+				</x:variable>-->
+				<a class="edit" href="#link-{$datasource/pageName}/{@item}/{//*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
 			</div>
+			<x:if test="not($richText)">
+				<x:copy-of select="$langdoc//noText/node()"/>
+			</x:if>
 		</x:if>
 
 		<x:variable name="richText" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:copy-of select="$richText/node()"/>
-		<x:if test="$role='admin' and not($richText)">
-			 <x:copy-of select="$langdoc//noText/node()"/>
-		</x:if>
 	</x:template>
 
 </x:stylesheet>
