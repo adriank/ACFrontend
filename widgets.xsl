@@ -187,17 +187,11 @@
 
 	<x:template match="widget[@type='text']" mode="widget">
 		<x:param name="datasource" select="@datasource"/>
-		<x:if test="not($datasource)">
-			<x:copy-of select="$langdoc//noPage/node()"/>
-		</x:if>
 		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:if test="$role='admin'">
-			<div class="yui3-cssreset accms-optionsPanel">
-<!--				<x:variable name="page">
-					<x:value-of select="$datasource/pageName"/>
-					<x:if test="not($datasource/pageName)">_</x:if>
-				</x:variable>-->
-				<a class="edit" href="#link-{$datasource/pageName}/{@item}/{//*[@name='acr:view']/@path},{@item}"/>
+			<div class="acenv-widget-settings">
+				<a class="pageName" href="#{$datasource/pageName}"/>
+				<a class="itemName" href="#{@item}"/>
 			</div>
 			<x:if test="not($text)">
 				<x:copy-of select="$langdoc//noText/node()"/>
@@ -208,17 +202,10 @@
 
 	<x:template match="widget[@type='richText']" mode="widget">
 		<x:param name="datasource" select="@datasource"/>
-		<x:if test="not($datasource)">
-			<x:copy-of select="$langdoc//noPage/node()"/>
-		</x:if>
 		<x:variable name="richText" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-<!--				<x:variable name="page">
-					<x:value-of select="$datasource/pageName"/>
-					<x:if test="not($datasource/pageName)">_</x:if>
-				</x:variable>-->
-				<a class="edit" href="#link-{$datasource/pageName}/{@item}/{//*[@name='acr:view']/@path},{//*[@name='pagename']}"/>
+				<a class="edit" href="#link-{$datasource/pageName}/{@item}/{//*[@name='acr:view']/@path},{$datasource/pageName}"/>
 			</div>
 			<x:if test="not($richText)">
 				<x:copy-of select="$langdoc//noText/node()"/>
