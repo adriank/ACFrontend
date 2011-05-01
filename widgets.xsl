@@ -192,6 +192,7 @@
 			<div class="acenv-widget-settings">
 				<a class="pageName" href="#{$datasource/pageName}"/>
 				<a class="itemName" href="#{@item}"/>
+				<a class="id" href="#{$datasource/_id}"/>
 			</div>
 			<x:if test="not($text)">
 				<x:copy-of select="$langdoc//noText/node()"/>
