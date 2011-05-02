@@ -206,7 +206,7 @@
 					</x:when>
 					<x:when test="local-name()='item' and @type!='hidden'">
 						<div class="item">
-							<x:if test="count(@label)=0 or @label='enabled'">
+							<x:if test="@label!='disabled'">
 								<label for="{@name}">
 									<x:variable name="ml" select="$langdoc//*[local-name()=current()/@ml]"/>
 									<x:choose>
