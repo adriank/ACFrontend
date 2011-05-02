@@ -24,16 +24,14 @@
 		<head>
 			<!-- TODO add datasource support -->
 			<title>
-				<x:for-each select="$layoutdoc/pagetitle/node()">
+				<x:for-each select="$layoutdoc/pageTitle/node()">
 					<x:call-template name="template">
 						<x:with-param name="datasource"><none/></x:with-param>
 					</x:call-template>
 				</x:for-each>
 				-
 				<x:for-each select="$configdoc/name/node()">
-					<x:call-template name="template">
-						<x:with-param name="datasource"><none/></x:with-param>
-					</x:call-template>
+					<x:call-template name="template"/>
 				</x:for-each>
 			</title>
 			<meta name="description" content="{$configdoc/description/node()}"/>
@@ -206,7 +204,7 @@
 					</x:when>
 					<x:when test="local-name()='item' and @type!='hidden'">
 						<div class="item">
-							<x:if test="@label!='disabled'">
+							<x:if test="not(@label) or @label!='disabled'">
 								<label for="{@name}">
 									<x:variable name="ml" select="$langdoc//*[local-name()=current()/@ml]"/>
 									<x:choose>
