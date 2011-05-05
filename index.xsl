@@ -14,7 +14,7 @@
 	<x:variable name="config" select="//object[@name='acr:appDetails']/@config"/>
 	<x:variable name="configdoc" select="document(concat('','../xml/',$config,'.xml'))/config"/>
 	<x:variable name="langdoc" select="document(concat('../texts/',$lang,'.xml'))/t"/>
-	<x:variable name="static" select="$configdoc/staticdomain/node()"/>
+	<x:variable name="static">http://ac.acimg.eu/</x:variable>
 	<x:variable name="role" select="//object[@name='acr:user']/@role"/>
 	<x:variable name="layoutdoc" select="//object[@name='layout']"/>
 	<x:include href="widgets.xsl"/>
@@ -38,7 +38,6 @@
 			<meta name="keywords" content="{$configdoc/keywords/node()}"/>
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 			<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
-			<!-- export css and js to config.xml -->
 			<link rel="stylesheet" type="text/css" href="http://e.acimg.eu/css/yui-rf.css"/>
 			<link href="http://e.acimg.eu/css/grids.css" rel="stylesheet" type="text/css"/>
 			<link href="{$static}css/style.css" rel="stylesheet" type="text/css"/>
@@ -50,9 +49,7 @@
 			<x:for-each select="//script[@url]">
 				<script type="text/javascript" src="{@url}"/>
 			</x:for-each>
-			<x:if test="//item[@type='richText']">
-				<script type="text/javascript" src="/js/richText.js"/>
-			</x:if>
+
 			<script type="text/javascript"><x:value-of select="//*[@name='layout']/script/node()"/></script>
 		</head>
 		<body>
