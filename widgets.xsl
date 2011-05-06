@@ -18,7 +18,7 @@
 	</x:template>
 
 	<x:template match="widget[@type='menu']" mode="widget">
-		<x:attribute name="class">widget yui3-menu <x:value-of select="@class"/></x:attribute>
+		<x:attribute name="class">widget yui3-menu acenv-menu <x:value-of select="@class"/></x:attribute>
 		<x:variable name="accesskey" select="@accesskey"/>
 		<div class="yui3-menu-content">
 		<ul>

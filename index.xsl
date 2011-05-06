@@ -10,11 +10,10 @@
 	<!--<x:variable name="doc" select="/list//*"/>-->
 	<x:variable name="lang" select="//object[@name='acr:lang']/@current"/>
 	<!-- IE doesn't understand relative paths so domain MUST be predefined -->
-	<x:variable name="domain" select="//object[@name='acr:appDetails']/@domain"/>
-	<x:variable name="config" select="//object[@name='acr:appDetails']/@config"/>
-	<x:variable name="configdoc" select="document(concat('','../xml/',$config,'.xml'))/config"/>
-	<x:variable name="langdoc" select="document(concat('../texts/',$lang,'.xml'))/t"/>
-	<x:variable name="static">http://ac.acimg.eu/</x:variable>
+	<x:variable name="config" select="//object[@name='acr:appDetails']"/>
+	<x:variable name="domain" select="$config/@domain"/>
+	<x:variable name="langdoc" select="document(concat($domain,'/texts/',$lang,'.xml'))/t"/>
+	<x:variable name="static" select="concat('http://',$domain,'/')"/>
 	<x:variable name="role" select="//object[@name='acr:user']/@role"/>
 	<x:variable name="layoutdoc" select="//object[@name='layout']"/>
 	<x:include href="widgets.xsl"/>
@@ -30,12 +29,12 @@
 					</x:call-template>
 				</x:for-each>
 				-
-				<x:for-each select="$configdoc/name/node()">
+				<x:for-each select="$config/name/node()">
 					<x:call-template name="template"/>
 				</x:for-each>
 			</title>
-			<meta name="description" content="{$configdoc/description/node()}"/>
-			<meta name="keywords" content="{$configdoc/keywords/node()}"/>
+			<meta name="description" content="{$config/description/node()}"/>
+			<meta name="keywords" content="{$config/keywords/node()}"/>
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 			<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
 			<link rel="stylesheet" type="text/css" href="http://e.acimg.eu/css/yui-rf.css"/>
@@ -45,11 +44,10 @@
 				<link href="{@url}" rel="stylesheet" type="text/css"/>
 			</x:for-each>
 			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.3.0/build/yui/yui-min.js&amp;3.3.0/build/loader/loader-min.js"></script>
-			<script type="text/javascript" src="/js/init.js"/>
+			<script type="text/javascript" src="http://ac.acimg.eu/js/init.js"/>
 			<x:for-each select="//script[@url]">
 				<script type="text/javascript" src="{@url}"/>
 			</x:for-each>
-
 			<script type="text/javascript"><x:value-of select="//*[@name='layout']/script/node()"/></script>
 		</head>
 		<body>
@@ -65,7 +63,7 @@
 	<x:template match="container">
 		<x:variable name="width">
 			<x:value-of select="@width"/>
-			<x:if test="not(@width)"><x:value-of select="$configdoc/defaultwidth/node()"/></x:if>
+			<x:if test="not(@width)"><x:value-of select="$config/defaultwidth/node()"/></x:if>
 		</x:variable>
 		<div class="container w{$width} {@name}">
 			<x:apply-templates select="./*"/>
