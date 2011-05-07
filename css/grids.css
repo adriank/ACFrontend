@@ -1,0 +1,58 @@
+.container:after, .last:after{
+	display: block;
+	height: 0 !important;
+	clear: both;
+	visibility: hidden;
+	overflow:hidden;
+	line-height:0;
+	font-size:xx-large;
+	content:" x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";
+}
+.container{
+	*zoom:1;
+}
+.w750{
+	width:750px;
+	margin:auto;
+}
+.w950{
+	width:950px;
+	margin:auto;
+}
+.w974{
+	width:974px;
+	margin:auto;
+}
+.col,.column{
+	float:left;
+}
+.whole, .wwhole{float:none;}
+.half{width:50%;}
+.third{width:33.333333%;}
+.twothirds{width:66.666666%;}
+.quarter{width:25%;}
+.threequarters{width:75%;}
+.fifth{width:20%;}
+.twofifths{width:40%;}
+.threefifths{width:60%;}
+.fourfifths{width:80%;}
+.sixth{width:16.666666%;}
+.c180{width:180px;}
+.c160{width:160px;}
+.last{
+	display: table-cell;
+	float: none;
+	width:auto;
+	*display:block;
+	*zoom:1;
+	_position:relative;
+	_left:-3px;
+	_margin-right: -3px;
+}
+.right{
+	float:right;
+}
+.widget{
+	position:relative;
+	*position:static;
+}

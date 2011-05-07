@@ -81,6 +81,7 @@
 	</x:template>
 
 	<x:template match="script|pageTitle|style"/>
+
 	<x:template match="widget" name="widget">
 		<x:param name="datasource" select="(//object|//list)[@name=current()/@datasource]"/>
 		<x:variable name="tag">
