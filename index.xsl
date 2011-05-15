@@ -12,7 +12,7 @@
 	<!-- IE doesn't understand relative paths so domain MUST be predefined -->
 	<x:variable name="config" select="//object[@name='acr:appDetails']"/>
 	<x:variable name="domain" select="$config/@domain"/>
-	<x:variable name="langdoc" select="document(concat($domain,'/texts/',$lang,'.xml'))/t"/>
+	<x:variable name="langdoc" select="document(concat('http://',$domain,'/texts/',$lang,'.xml'))/t"/>
 	<x:variable name="static" select="concat('http://',$domain,'/')"/>
 	<x:variable name="role" select="//object[@name='acr:user']/@role"/>
 	<x:variable name="layoutdoc" select="//object[@name='layout']"/>
@@ -44,7 +44,6 @@
 				<link href="{@url}" rel="stylesheet" type="text/css"/>
 			</x:for-each>
 			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.3.0/build/yui/yui-min.js&amp;3.3.0/build/loader/loader-min.js"></script>
-			<script type="text/javascript" src="http://ac.acimg.eu/js/init.js"/>
 			<x:for-each select="//script[@url]">
 				<script type="text/javascript" src="{@url}"/>
 			</x:for-each>
@@ -63,7 +62,7 @@
 	<x:template match="container">
 		<x:variable name="width">
 			<x:value-of select="@width"/>
-			<x:if test="not(@width)"><x:value-of select="$config/defaultwidth/node()"/></x:if>
+			<x:if test="not(@width)">950</x:if>
 		</x:variable>
 		<div class="container w{$width} {@name}">
 			<x:apply-templates select="./*"/>
@@ -89,7 +88,9 @@
 			<x:if test="not(@tag)">div</x:if>
 		</x:variable>
 		<x:element name="{$tag}">
-			<x:attribute name="id"><x:value-of select="@name"/></x:attribute>
+			<x:if test="@mode!='tree' or $datasource/@name!=@childName">
+				<x:attribute name="id"><x:value-of select="@name"/></x:attribute>
+			</x:if>
 
 			<x:variable name="before">
 				<x:for-each select="before/node()">
@@ -199,7 +200,7 @@
 						<input id="{@name}" type="{@type}" name="{@name}" value="{$value}"/>
 					</x:when>
 					<x:when test="local-name()='item' and @type!='hidden'">
-						<div class="item">
+						<div class="item {@type}">
 							<x:if test="not(@label) or @label!='disabled'">
 								<label for="{@name}">
 									<x:variable name="ml" select="$langdoc//*[local-name()=current()/@ml]"/>
