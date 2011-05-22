@@ -17,6 +17,18 @@
 		</li>
 	</x:template>
 
+	<x:template match="widget[@type='menuButton']" mode="widget">
+		<x:attribute name="class">widget acenv-menuButton <x:value-of select="@class"/></x:attribute>
+		<a class="acenv-menuButton-trigger" href="label/{@url}"><x:copy-of select="label/node()"/></a>
+		<div class="acenv-menuButton-content hide">
+			<x:for-each select="content/*">
+				<x:call-template name="template">
+					<x:with-param name="datasource" select="@datasource"/>
+				</x:call-template>
+			</x:for-each>
+		</div>
+	</x:template>
+
 	<x:template match="widget[@type='menu']" mode="widget">
 		<x:attribute name="class">widget yui3-menu acenv-menu <x:value-of select="@class"/></x:attribute>
 		<x:variable name="accesskey" select="@accesskey"/>

@@ -88,7 +88,7 @@
 			<x:if test="not(@tag)">div</x:if>
 		</x:variable>
 		<x:element name="{$tag}">
-			<x:if test="@mode!='tree' or $datasource/@name!=@childName">
+			<x:if test="not(@mode) or @mode!='tree' or $datasource/@name!=@childName">
 				<x:attribute name="id"><x:value-of select="@name"/></x:attribute>
 			</x:if>
 
@@ -171,6 +171,7 @@
 	<x:template match="widget[@type='form']" mode="widget">
 		<x:param name="datasource" select="//object[@name=current()/@datasource]"/>
 		<form action="{@action}" method="post" enctype="multipart/form-data">
+			<x:variable name="name" select="@name"/>
 			<x:for-each select="*">
 				<x:variable name="value">
 					<x:variable name="helper" select="$datasource/*[name()=current()/@name]"/>
@@ -197,7 +198,7 @@
 						</x:call-template>
 					</x:when>
 					<x:when test="local-name()='item' and @type='hidden'">
-						<input id="{@name}" type="{@type}" name="{@name}" value="{$value}"/>
+						<input id="{$name}-{@name}" type="{@type}" name="{@name}" value="{$value}"/>
 					</x:when>
 					<x:when test="local-name()='item' and @type!='hidden'">
 						<div class="item {@type}">
@@ -222,16 +223,19 @@
 							</x:if>
 							<x:choose>
 								<x:when test="@type='text' or @type='file' or @type='hidden' or @type='password'">
-									<input id="{@name}" type="{@type}" name="{@name}" value="{$value}" accesskey="{@accesskey}"/>
+									<input id="{$name}-{@name}" type="{@type}" name="{@name}" value="{$value}" accesskey="{@accesskey}"/>
+								</x:when>
+								<x:when test="@type='button'">
+									<button id="{$name}-{@name}" name="{@name}" class="{@name}" accesskey="{@accesskey}"><x:copy-of select="$value"/></button>
 								</x:when>
 								<x:when test="@type='textarea'">
-									<textarea id="{@name}" name="{@name}" accesskey="{@accesskey}"><x:copy-of select="$value"/></textarea>
+									<textarea id="{$name}-{@name}" name="{@name}" accesskey="{@accesskey}"><x:copy-of select="$value"/></textarea>
 								</x:when>
 								<x:when test="@type='richText'">
-									<textarea id="{@name}" name="{@name}" accesskey="{@accesskey}" class="richText"><x:value-of select="$value"/></textarea>
+									<textarea id="{$name}-{@name}" name="{@name}" accesskey="{@accesskey}" class="acenv-richText"><x:value-of select="$value"/></textarea>
 								</x:when>
 								<x:when test="@type='checkbox'">
-									<input id="{@name}" type="checkbox" name="{@name}" value="true" accesskey="{@accesskey}">
+									<input id="{$name}-{@name}" type="checkbox" name="{@name}" value="true" accesskey="{@accesskey}">
 									<x:if test="$value='t' or @checked='true'">
 										<x:attribute name="checked">checked</x:attribute>
 									</x:if>
@@ -239,7 +243,7 @@
 								</x:when>
 								<x:when test="@type='spinner'">
 									<div class="spinner">
-										<input id="{@name}" name="{@name}" type="text" class="yui-spinner-value" value="{$value}"/>
+										<input id="{$name}-{@name}" name="{@name}" type="text" class="yui-spinner-value" value="{$value}"/>
 									</div>
 								</x:when>
 								<x:otherwise>
@@ -273,7 +277,7 @@
 				</x:choose>
 			</x:for-each>
 			<x:if test="not(@submit) or @submit!='none'">
-				<input id="submit" name="submit" value="{$langdoc/submit/node()}" type="submit" accesskey="s"/>
+				<input id="{$name}-submit" name="submit" class="submit" value="{$langdoc/submit/node()}" type="submit" accesskey="s"/>
 			</x:if>
 		</form>
 	</x:template>
@@ -287,6 +291,9 @@
 		<x:choose>
 			<x:when test="local-name(.)='ml'">
 				<x:copy-of select="$langdoc//*[local-name()=current()/@name]/node()"/>
+				<x:if test="@node">
+					<x:copy-of select="$langdoc//*[local-name()=$datasource/*[local-name()=current()/@node]/node()]/node()"/>
+				</x:if>
 			</x:when>
 			<x:when test="local-name(.)='node'">
 				<x:copy-of select="$datasource/*[local-name()=current()/@name]/node()"/>
@@ -295,9 +302,14 @@
 				<x:value-of select="$datasource/@*[local-name()=current()/@name]"/>
 			</x:when>
 			<x:when test="local-name(.)='widget'">
-				<x:call-template name="widget">
-					<x:with-param name="datasource" select="$datasource"/>
-				</x:call-template>
+				<x:if test="@datasource">
+					<x:call-template name="widget"/>
+				</x:if>
+				<x:if test="not(@datasource)">
+					<x:call-template name="widget">
+						<x:with-param name="datasource" select="$datasource"/>
+					</x:call-template>
+				</x:if>
 			</x:when>
 			<x:when test="not(name())">
 				<x:value-of select="."/>

@@ -25,7 +25,7 @@ YUI({
 			focusAtStart: false,
 			handleSubmit:true,
 			markup:'xhtml',
-			ptags:true,
+			ptags:true
 			//toolbar:{
 			//	titlebar:false,
 			//	//grouplabels:false,
