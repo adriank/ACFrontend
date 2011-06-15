@@ -20,10 +20,10 @@
 	<x:template match="widget[@type='menuButton']" mode="widget">
 		<x:attribute name="class">widget acenv-menuButton <x:value-of select="@class"/></x:attribute>
 		<a class="acenv-menuButton-trigger" href="label/{@url}"><x:copy-of select="label/node()"/></a>
-		<div class="acenv-menuButton-content hide">
+		<div class="acenv-menuButton-content hide ">
 			<x:for-each select="content/*">
 				<x:call-template name="template">
-					<x:with-param name="datasource" select="@datasource"/>
+					<x:with-param name="dataSource" select="@dataSource"/>
 				</x:call-template>
 			</x:for-each>
 		</div>
@@ -114,9 +114,9 @@
 	</x:template>
 
 	<x:template match="widget[@type='siteMap']" mode="widget">
-		<x:variable name="datasource" select="//*[local-name()=current()/@datasource]"/>
-		<x:variable name="width" select="99.9 div count($datasource/category)"/>
-		<x:for-each select="$datasource/category">
+		<x:variable name="dataSource" select="//*[local-name()=current()/@dataSource]"/>
+		<x:variable name="width" select="99.9 div count($dataSource/category)"/>
+		<x:for-each select="$dataSource/category">
 			<div class="block" style="width:{$width}%;">
 				<h3><x:value-of select="$langdoc//*[local-name()=current()/@langElement]"/></h3>
 				<ul>
@@ -129,14 +129,8 @@
 		<div style="clear:both;"/>
 	</x:template>
 
-	<x:template match="widget[@type='rmotp']" mode="widget">
-		<div class="center">
-			<div class="title"><x:value-of select="$langdoc//*[local-name()='rmotp']"/></div>
-			<div class="content">
-				<x:value-of select="$langdoc//*[local-name()='rmotpText']"/>
-				<x:apply-templates select="widget" mode="widget"/>
-			</div>
-		</div>
+	<x:template match="widget[@type='image']" mode="widget">
+		<img src="{url}" alt="{alt}"/>
 	</x:template>
 
 	<x:template match="widget[@type='debug']" mode="widget">
@@ -156,19 +150,19 @@
 
 <!-- template execution order is not deterministic -->
 	<x:template match="widget[@type='template']|widget[not(@type)]" name="templateWidget" mode="widget">
-		<x:param name="datasource" select="@datasource"/>
+		<x:param name="dataSource" select="@dataSource"/>
 		<x:choose>
 			<x:when test="count(template)">
 				<x:for-each select="template/*">
 					<x:call-template name="template">
-						<x:with-param name="datasource" select="$datasource"/>
+						<x:with-param name="dataSource" select="$dataSource"/>
 					</x:call-template>
 				</x:for-each>
 			</x:when>
 			<x:otherwise>
 				<x:for-each select="*|text()">
 					<x:call-template name="template">
-						<x:with-param name="datasource" select="$datasource"/>
+						<x:with-param name="dataSource" select="$dataSource"/>
 					</x:call-template>
 				</x:for-each>
 			</x:otherwise>
@@ -176,15 +170,15 @@
 	</x:template>
 
 	<x:template match="widget[@type='wiki']" mode="widget">
-		<x:param name="datasource" select="@datasource"/>
-		<x:if test="not($datasource/permalink)">
+		<x:param name="dataSource" select="@dataSource"/>
+		<x:if test="not($dataSource/permalink)">
 			<x:copy-of select="$langdoc//noArticle/node()"/>
 		</x:if>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
 				<x:choose>
-					<x:when test="$datasource/permalink">
-						<a class="edit" href="#permalink-{$datasource/permalink}"/>
+					<x:when test="$dataSource/permalink">
+						<a class="edit" href="#permalink-{$dataSource/permalink}"/>
 					</x:when>
 					<x:otherwise>
 						<a class="add" href="#permalink-{@realm}"/>
@@ -193,18 +187,18 @@
 			</div>
 		</x:if>
 		<x:call-template name="templateWidget">
-			<x:with-param name="datasource" select="$datasource"/>
+			<x:with-param name="dataSource" select="$dataSource"/>
 		</x:call-template>
 	</x:template>
 
 	<x:template match="widget[@type='text']" mode="widget">
-		<x:param name="datasource" select="@datasource"/>
-		<x:variable name="text" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
+		<x:param name="dataSource" select="@dataSource"/>
+		<x:variable name="text" select="$dataSource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:if test="$role='admin'">
 			<div class="acenv-widget-settings">
-				<a class="pageName" href="#{$datasource/pageName}"/>
+				<a class="pageName" href="#{$dataSource/pageName}"/>
 				<a class="itemName" href="#{@item}"/>
-				<a class="id" href="#{$datasource/_id}"/>
+				<a class="id" href="#{$dataSource/_id}"/>
 			</div>
 			<x:if test="not($text)">
 				<x:copy-of select="$langdoc//noText/node()"/>
@@ -214,11 +208,11 @@
 	</x:template>
 
 	<x:template match="widget[@type='richText']" mode="widget">
-		<x:param name="datasource" select="@datasource"/>
-		<x:variable name="richText" select="$datasource/*[@name='items']/*[name()=current()/@item]"/>
+		<x:param name="dataSource" select="@dataSource"/>
+		<x:variable name="richText" select="$dataSource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:if test="$role='admin'">
 			<div class="yui3-cssreset accms-optionsPanel">
-				<a class="edit" href="#link-{$datasource/pageName}/{@item}/{//*[@name='acr:view']/@path},{$datasource/pageName}"/>
+				<a class="edit" href="#link-{$dataSource/pageName}/{@item}/{//*[@name='acr:view']/@path},{$dataSource/pageName}"/>
 			</div>
 			<x:if test="not($richText)">
 				<x:copy-of select="$langdoc//noText/node()"/>

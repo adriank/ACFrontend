@@ -16,16 +16,17 @@
 	<x:variable name="static" select="concat('http://',$domain,'/')"/>
 	<x:variable name="role" select="//object[@name='acr:user']/@role"/>
 	<x:variable name="layoutdoc" select="//object[@name='layout']"/>
+	<x:variable name="smallcase" select="'abcdefghijklmnopqrstuvwxyz'" />
+	<x:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
 	<x:include href="widgets.xsl"/>
 
 	<x:template match="/">
 		<html>
 		<head>
-			<!-- TODO add datasource support -->
 			<title>
 				<x:for-each select="$layoutdoc/pageTitle/node()">
 					<x:call-template name="template">
-						<x:with-param name="datasource"><none/></x:with-param>
+						<x:with-param name="dataSource" select="(//object|//list)[@name=$layoutdoc/pageTitle/@dataSource]"/>
 					</x:call-template>
 				</x:for-each>
 				-
@@ -47,7 +48,7 @@
 			<x:for-each select="//script[@url]">
 				<script type="text/javascript" src="{@url}"/>
 			</x:for-each>
-			<script type="text/javascript"><x:value-of select="//*[@name='layout']/script/node()"/></script>
+			<script type="text/javascript"><x:value-of select="//*[@name='layout']//script/node()"/></script>
 		</head>
 		<body>
 			<x:apply-templates select="$layoutdoc"/>
@@ -82,20 +83,20 @@
 	<x:template match="script|pageTitle|style"/>
 
 	<x:template match="widget" name="widget">
-		<x:param name="datasource" select="(//object|//list)[@name=current()/@datasource]"/>
+		<x:param name="dataSource" select="(//object|//list)[@name=current()/@dataSource]"/>
 		<x:variable name="tag">
 			<x:value-of select="@tag"/>
 			<x:if test="not(@tag)">div</x:if>
 		</x:variable>
 		<x:element name="{$tag}">
-			<x:if test="not(@mode) or @mode!='tree' or $datasource/@name!=@childName">
+			<x:if test="not(@mode) or @mode!='tree' or $dataSource/@name!=@childName">
 				<x:attribute name="id"><x:value-of select="@name"/></x:attribute>
 			</x:if>
 
 			<x:variable name="before">
 				<x:for-each select="before/node()">
 					<x:call-template name="template">
-						<x:with-param name="datasource" select="$datasource"/>
+						<x:with-param name="dataSource" select="$dataSource"/>
 					</x:call-template>
 				</x:for-each>
 			</x:variable>
@@ -111,7 +112,7 @@
 			</x:variable>
 
 			<x:choose>
-				<x:when test="local-name($datasource)='list' and count($datasource/object)">
+				<x:when test="local-name($dataSource)='list' and count($dataSource/object)">
 					<x:attribute name="class">widget <x:value-of select="$type"/>-list <x:value-of select="@class"/></x:attribute>
 					<x:copy-of select="$before"/>
 					<x:variable name="this" select="."/>
@@ -119,7 +120,7 @@
 					<x:if test="$role='admin'">
 						<div class="accms-optionsPanel"/>
 					</x:if>
-					<x:for-each select="$datasource/object">
+					<x:for-each select="$dataSource/object">
 						<x:element name="{$subtag}">
 							<x:attribute name="class">
 								widget <x:value-of select="$type"/>-item
@@ -127,28 +128,28 @@
 								<x:value-of select="$subtagclass"/>
 							</x:attribute>
 							<x:apply-templates mode="widget" select="$this">
-								<x:with-param name="datasource" select="."/>
+								<x:with-param name="dataSource" select="."/>
 							</x:apply-templates>
 							<x:if test="$this/@mode='tree' and ./*[@name=$this/@childName]/node()">
 								<x:variable name="data" select="*[@name=$this/@childName]"/>
 								<x:for-each select="$this">
 									<x:call-template name="widget">
-										<x:with-param name="datasource" select="$data"/>
+										<x:with-param name="dataSource" select="$data"/>
 									</x:call-template>
 								</x:for-each>
 							</x:if>
 						</x:element>
 					</x:for-each>
 				</x:when>
-				<x:when test="not(@datasource) or $datasource/node() or @showEmpty='true' or @type='form'">
+				<x:when test="not(@dataSource) or $dataSource/node() or @showEmpty='true' or @type='form'">
 					<x:attribute name="class">widget <x:value-of select="$type"/>-item <x:value-of select="@class"/></x:attribute>
 					<x:copy-of select="$before"/>
 					<x:apply-templates mode="widget" select=".">
-						<x:with-param name="datasource" select="$datasource"/>
+						<x:with-param name="dataSource" select="$dataSource"/>
 					</x:apply-templates>
-					<x:if test="@mode='tree' and $datasource/*[@name=current()/@childName]/node()">
+					<x:if test="@mode='tree' and $dataSource/*[@name=current()/@childName]/node()">
 						<x:call-template name="widget">
-							<x:with-param name="datasource" select="$datasource/*[@name=current()/@childName]"/>
+							<x:with-param name="dataSource" select="$dataSource/*[@name=current()/@childName]"/>
 						</x:call-template>
 					</x:if>
 				</x:when>
@@ -157,7 +158,7 @@
 
 			<x:for-each select="after/node()">
 				<x:call-template name="template">
-					<x:with-param name="datasource" select="."/>
+					<x:with-param name="dataSource" select="."/>
 				</x:call-template>
 			</x:for-each>
 		</x:element>
@@ -169,12 +170,12 @@
 
 	<!-- TODO add required fields support -->
 	<x:template match="widget[@type='form']" mode="widget">
-		<x:param name="datasource" select="//object[@name=current()/@datasource]"/>
+		<x:param name="dataSource" select="//object[@name=current()/@dataSource]"/>
 		<form action="{@action}" method="post" enctype="multipart/form-data">
 			<x:variable name="name" select="@name"/>
 			<x:for-each select="*">
 				<x:variable name="value">
-					<x:variable name="helper" select="$datasource/*[name()=current()/@name]"/>
+					<x:variable name="helper" select="$dataSource/*[name()=current()/@name]"/>
 					<x:choose>
 						<x:when test="@value">
 							<x:copy-of select="//object[@name=current()/@value]/node()"/>
@@ -182,7 +183,7 @@
 						<x:when test="count(node())">
 							<x:for-each select="node()">
 								<x:call-template name="template">
-									<x:with-param name="datasource" select="$datasource"/>
+									<x:with-param name="dataSource" select="$dataSource"/>
 								</x:call-template>
 							</x:for-each>
 						</x:when>
@@ -194,7 +195,7 @@
 				<x:choose>
 					<x:when test="local-name(.)='widget'">
 						<x:call-template name="widget">
-							<x:with-param name="datasource" select="//*[@name=current()/@datasource]"/>
+							<x:with-param name="dataSource" select="//*[@name=current()/@dataSource]"/>
 						</x:call-template>
 					</x:when>
 					<x:when test="local-name()='item' and @type='hidden'">
@@ -236,7 +237,7 @@
 								</x:when>
 								<x:when test="@type='checkbox'">
 									<input id="{$name}-{@name}" type="checkbox" name="{@name}" value="true" accesskey="{@accesskey}">
-									<x:if test="$value='t' or @checked='true'">
+									<x:if test="translate($value, $uppercase, $smallcase)='true' or translate(@checked, $uppercase, $smallcase)='true'">
 										<x:attribute name="checked">checked</x:attribute>
 									</x:if>
 									</input>
@@ -283,31 +284,31 @@
 	</x:template>
 
 	<!--
-		datasource is element with data for node
+		dataSource is element with data for node
 		context is template schema
 	-->
 	<x:template name="template">
-		<x:param name="datasource"/>
+		<x:param name="dataSource"/>
 		<x:choose>
 			<x:when test="local-name(.)='ml'">
 				<x:copy-of select="$langdoc//*[local-name()=current()/@name]/node()"/>
 				<x:if test="@node">
-					<x:copy-of select="$langdoc//*[local-name()=$datasource/*[local-name()=current()/@node]/node()]/node()"/>
+					<x:copy-of select="$langdoc//*[local-name()=$dataSource/*[local-name()=current()/@node]/node()]/node()"/>
 				</x:if>
 			</x:when>
 			<x:when test="local-name(.)='node'">
-				<x:copy-of select="$datasource/*[local-name()=current()/@name]/node()"/>
+				<x:copy-of select="$dataSource/*[local-name()=current()/@name]/node()"/>
 			</x:when>
 			<x:when test="local-name(.)='attr'">
-				<x:value-of select="$datasource/@*[local-name()=current()/@name]"/>
+				<x:value-of select="$dataSource/@*[local-name()=current()/@name]"/>
 			</x:when>
 			<x:when test="local-name(.)='widget'">
-				<x:if test="@datasource">
+				<x:if test="@dataSource">
 					<x:call-template name="widget"/>
 				</x:if>
-				<x:if test="not(@datasource)">
+				<x:if test="not(@dataSource)">
 					<x:call-template name="widget">
-						<x:with-param name="datasource" select="$datasource"/>
+						<x:with-param name="dataSource" select="$dataSource"/>
 					</x:call-template>
 				</x:if>
 			</x:when>
@@ -322,7 +323,7 @@
 								<x:value-of select="."/>
 								<x:for-each select="parent::*/pars[@for=local-name(current())]/node()">
 									<x:call-template name="template">
-										<x:with-param name="datasource" select="$datasource"/>
+										<x:with-param name="dataSource" select="$dataSource"/>
 									</x:call-template>
 								</x:for-each>
 							</x:variable>
@@ -331,7 +332,7 @@
 					</x:for-each>
 					<x:for-each select="text()|*[local-name()!='pars']">
 						<x:call-template name="template">
-							<x:with-param name="datasource" select="$datasource"/>
+							<x:with-param name="dataSource" select="$dataSource"/>
 						</x:call-template>
 					</x:for-each>
 				</x:element>
