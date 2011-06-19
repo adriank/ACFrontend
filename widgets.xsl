@@ -221,4 +221,30 @@
 		<x:copy-of select="$richText/node()"/>
 	</x:template>
 
+	<x:template match="widget[@type='image']" mode="widget">
+		<x:param name="dataSource" select="@dataSource"/>
+		<x:variable name="url">
+			<x:for-each select="url/node()">
+				<x:call-template name="template">
+					<x:with-param name="dataSource" select="$dataSource"/>
+				</x:call-template>
+			</x:for-each>
+		</x:variable>
+		<x:if test="contains(@class, 'acenv-editable')">
+			<div class="accms-optionsPanel">
+				<a class="edit" href="#link-{$dataSource/pageName}/{@item}/{//*[@name='acr:view']/@path},{$dataSource/pageName}"/>
+			</div>
+		</x:if>
+		<img>
+			<x:attribute name="src"><x:value-of select="$url"/></x:attribute>
+			<x:attribute name="alt">
+				<x:for-each select="alt/node()">
+					<x:call-template name="template">
+						<x:with-param name="dataSource" select="$dataSource"/>
+					</x:call-template>
+				</x:for-each>
+			</x:attribute>
+		</img>
+	</x:template>
+
 </x:stylesheet>
