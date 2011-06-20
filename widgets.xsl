@@ -194,7 +194,7 @@
 	<x:template match="widget[@type='text']" mode="widget">
 		<x:param name="dataSource" select="@dataSource"/>
 		<x:variable name="text" select="$dataSource/*[@name='items']/*[name()=current()/@item]"/>
-		<x:if test="$role='admin'">
+		<x:if test="@editable='true'">
 			<div class="acenv-widget-settings">
 				<a class="pageName" href="#{$dataSource/pageName}"/>
 				<a class="itemName" href="#{@item}"/>
@@ -210,7 +210,7 @@
 	<x:template match="widget[@type='richText']" mode="widget">
 		<x:param name="dataSource" select="@dataSource"/>
 		<x:variable name="richText" select="$dataSource/*[@name='items']/*[name()=current()/@item]"/>
-		<x:if test="$role='admin'">
+		<x:if test="@editable='true'">
 			<div class="yui3-cssreset accms-optionsPanel">
 				<a class="edit" href="#link-{$dataSource/pageName}/{@item}/{//*[@name='acr:view']/@path},{$dataSource/pageName}"/>
 			</div>
@@ -230,7 +230,7 @@
 				</x:call-template>
 			</x:for-each>
 		</x:variable>
-		<x:if test="contains(@class, 'acenv-editable')">
+		<x:if test="@editable='true'">
 			<div class="accms-optionsPanel">
 				<a class="edit" href="#link-{$dataSource/pageName}/{@item}/{//*[@name='acr:view']/@path},{$dataSource/pageName}"/>
 			</div>
