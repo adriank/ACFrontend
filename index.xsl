@@ -304,7 +304,9 @@
 			</x:when>
 			<x:when test="local-name(.)='widget'">
 				<x:if test="@dataSource">
-					<x:call-template name="widget"/>
+					<x:call-template name="widget">
+						<x:with-param name="dataSource" select="$dataSource/*[@name=current()/@dataSource]"/>
+					</x:call-template>
 				</x:if>
 				<x:if test="not(@dataSource)">
 					<x:call-template name="widget">
