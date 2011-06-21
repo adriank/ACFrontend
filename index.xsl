@@ -30,9 +30,7 @@
 					</x:call-template>
 				</x:for-each>
 				-
-				<x:for-each select="$config/name/node()">
-					<x:call-template name="template"/>
-				</x:for-each>
+				<x:value-of select="$langdoc/siteName/node()"/>
 			</title>
 			<meta name="description" content="{$config/description/node()}"/>
 			<meta name="keywords" content="{$config/keywords/node()}"/>
