@@ -37,12 +37,11 @@
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 			<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
 			<link rel="stylesheet" type="text/css" href="http://e.acimg.eu/css/yui-rf.css"/>
-			<link href="http://e.acimg.eu/css/grids.css" rel="stylesheet" type="text/css"/>
 			<link href="{$static}css/style.css" rel="stylesheet" type="text/css"/>
 			<x:for-each select="//style">
 				<link href="{@url}" rel="stylesheet" type="text/css"/>
 			</x:for-each>
-			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.3.0/build/yui/yui-min.js&amp;3.3.0/build/loader/loader-min.js"></script>
+			<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.2.0/build/yui/yui-min.js&amp;3.2.0/build/loader/loader-min.js"></script>
 			<x:for-each select="//script[@url]">
 				<script type="text/javascript" src="{@url}"/>
 			</x:for-each>
@@ -59,11 +58,7 @@
 	</x:template>
 
 	<x:template match="container">
-		<x:variable name="width">
-			<x:value-of select="@width"/>
-			<x:if test="not(@width)">950</x:if>
-		</x:variable>
-		<div class="container w{$width} {@name}">
+		<div id="cont-{@name}" class="container w{@width} {@name} {@class}">
 			<x:apply-templates select="./*"/>
 		</div>
 	</x:template>
@@ -73,7 +68,7 @@
 			<x:value-of select="@width"/>
 			<x:if test="not(@width)">last</x:if>
 		</x:variable>
-		<div class="column {$width} {@name}">
+		<div id="col-{@name}" class="column {$width} {@name}">
 			<x:apply-templates select="./*"/>
 		</div>
 	</x:template>
@@ -90,6 +85,7 @@
 			<x:if test="not(@mode) or @mode!='tree' or $dataSource/@name!=@childName">
 				<x:attribute name="id"><x:value-of select="@name"/></x:attribute>
 			</x:if>
+			<x:attribute name="title"><x:value-of select="@desc"/></x:attribute>
 
 			<x:variable name="before">
 				<x:for-each select="before/node()">

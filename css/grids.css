@@ -8,9 +8,7 @@
 	font-size:xx-large;
 	content:" x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";
 }
-.container{
-	*zoom:1;
-}
+.container{*zoom:1;}
 .w750{
 	width:750px;
 	margin:auto;
@@ -23,9 +21,8 @@
 	width:974px;
 	margin:auto;
 }
-.col,.column{
-	float:left;
-}
+.col,.column{float:left;}
+.rcol,.rcolumn{float:right;}
 .whole, .wwhole{float:none;}
 .half{width:50%;}
 .third{width:33.333333%;}
@@ -49,10 +46,69 @@
 	_left:-3px;
 	_margin-right: -3px;
 }
-.right{
-	float:right;
-}
 .widget{
 	position:relative;
 	*position:static;
 }
+/* heights */
+.h16{height:16px;}
+.h32{height:32px;}
+.h48{height:48px;}
+.h64{height:64px;}
+/* widths */
+.w16{width:16px;}
+.w32{width:32px;}
+.w48{width:48px;}
+.w64{width:64px;}
+/* margins - all */
+.m4{margin:4px;}
+.m8{margin:8px;}
+.m12{margin:12px;}
+.m16{margin:16px;}
+/* margins - horizontal - top and bottom */
+/* TODO margin-bottom seems to be not needed */
+.mh4{margin-top:4px;margin-bottom:4px;}
+.mh8{margin-top:8px;margin-bottom:8px;}
+.mh12{margin-top:12px;margin-bottom:12px;}
+.mh16{margin-top:16px;margin-bottom:16px;}
+/* margins - vertical - left and right */
+.mv4{margin-left:4px;margin-right:4px;}
+.mv8{margin-left:8px;margin-right:8px;}
+.mv12{margin-left:12px;margin-right:12px;}
+.mv16{margin-left:16px;margin-right:16px;}
+/* paddings - all */
+.p4{padding:4px;}
+.p8{padding:8px;}
+.p12{padding:12px;}
+.p16{padding:16px;}
+/* paddings - horizontal - top and bottom */
+.ph4{padding-top:4px;padding-bottom:4px;}
+.ph8{padding-top:8px;padding-bottom:8px;}
+.ph12{padding-top:12px;padding-bottom:12px;}
+.ph16{padding-top:16px;padding-bottom:16px;}
+/* paddings - vertical - left and right */
+.pv4{padding-left:4px;padding-right:4px;}
+.pv8{padding-left:8px;padding-right:8px;}
+.pv12{padding-left:12px;padding-right:12px;}
+.pv16{padding-left:16px;padding-right:16px;}
+/* align block to left or right */
+.left{float:left;}
+.right{float:right;}
+/* show element as block */
+.show, .block{display:block;}
+/* show element as inline (like p, a) */
+.inline{display:inline;}
+/* hide element - this is not visibility:hidden*/
+.hide{display:none;}
+.absolute{position:absolute;}
+.relative{position:relative;}
+.rounded3{
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+}
+.rounded5{
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
+}
+b,strong{font-weight:bold;}
+i{font-style:italic;}
