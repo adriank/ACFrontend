@@ -211,7 +211,7 @@
 		<x:param name="dataSource" select="@dataSource"/>
 		<x:variable name="richText" select="$dataSource/*[@name='items']/*[name()=current()/@item]"/>
 		<x:if test="@editable='true'">
-			<div class="yui3-cssreset accms-optionsPanel">
+			<div class="accms-optionsPanel">
 				<a class="edit" href="#link-{$dataSource/pageName}/{@item}/{//*[@name='acr:view']/@path},{$dataSource/pageName}"/>
 			</div>
 			<x:if test="not($richText)">

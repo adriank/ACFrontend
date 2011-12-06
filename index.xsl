@@ -36,7 +36,8 @@
 			<meta name="keywords" content="{$config/keywords/node()}"/>
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 			<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
-			<link rel="stylesheet" type="text/css" href="http://e.acimg.eu/css/yui-rf.css"/>
+			<link rel="stylesheet" type="text/css" href="http://acf.acimg.eu/css/yui-rf.css"/>
+			<link href="http://acf.acimg.eu/css/grids.css" rel="stylesheet" type="text/css"/>
 			<link href="{$static}css/style.css" rel="stylesheet" type="text/css"/>
 			<x:for-each select="//style">
 				<link href="{@url}" rel="stylesheet" type="text/css"/>
@@ -45,7 +46,7 @@
 			<x:for-each select="//script[@url]">
 				<script type="text/javascript" src="{@url}"/>
 			</x:for-each>
-			<script type="text/javascript"><x:value-of select="//*[@name='layout']//script/node()"/></script>
+			<script type="text/javascript"><x:value-of select="$layoutdoc//script/node()"/></script>
 		</head>
 		<body>
 			<x:apply-templates select="$layoutdoc"/>
@@ -58,7 +59,11 @@
 	</x:template>
 
 	<x:template match="container">
-		<div id="cont-{@name}" class="container w{@width} {@name} {@class}">
+		<x:variable name="width">
+			<x:value-of select="@width"/>
+			<x:if test="not(@width)">950</x:if>
+		</x:variable>
+		<div id="cont-{@name}" class="container w{$width} {@name} {@class}">
 			<x:apply-templates select="./*"/>
 		</div>
 	</x:template>
