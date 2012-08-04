@@ -164,7 +164,7 @@
 	</x:template>
 
 	<x:template match="access">
-		<a href="#" accesskey="{@key}"/>
+		<a href="#" class="hide" accesskey="{@key}"/>
 	</x:template>
 
 	<!-- TODO add required fields support -->
