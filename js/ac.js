@@ -22,7 +22,20 @@ var PREFIX="ac",
 		RE_PATH_Mustashes=/{{.+?}}/g // {{OPexpr},
 		RE_PATH_Mustashes_split=/{{.+?}}/g,
 		state=null,
+		locationHash={},
 		D=DEBUG=false
+
+D=true
+
+var updateHash=function(){
+	var h=[]
+	$.each(locationHash, function(k,o){
+		h.push(k+"="+o)
+	})
+	h="#!"+h.join("&")
+	if (D) console.log(h)
+	window.location.hash=h
+}
 
 $(document).ready(function(){
 	//var
@@ -44,7 +57,10 @@ $(document).ready(function(){
 			var v=variables.length?appDataOP.execute(variables.shift().slice(2,-2)) : ""
 			//console.log(appData)
 			//console.log(v)
-			result.push(e,v)
+			if (v instanceof Object) {
+				v=JSON.stringify(v, null, 2)
+			}
+			result.push(e, v)
 		})
 		//console.log("END: replaceVars with string:",result.join(""))
 		return result.join("")
@@ -169,13 +185,16 @@ $(document).ready(function(){
 	loadFragments(document)
 
 	state=getHashParams()
-	if (D) console.log(state)
+	if (D) console.log("hash state", state)
 	var refreshState=function(){
-		if (state.main) {
-			$("#main").attr(PREFIX+"-fragment",state.main)
-								.attr(PREFIX+"-dataSource",state.ds)
-			loadFragment($("#main")[0])
-		}
+		$.each(state,function(k,o){
+			if (k.indexOf("_ds")!==-1) {
+				return
+			}
+			$("#"+k).attr(PREFIX+"-fragment",state[k])
+								.attr(PREFIX+"-dataSource",state[k+"_ds"])
+			loadFragment($("#"+k)[0])
+		})
 	}
 	refreshState()
 	//window.onhashchange=refreshState
@@ -186,16 +205,18 @@ $(document).ready(function(){
 				href=$(e.currentTarget).attr("href"),
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
 				condition=$(e.currentTarget).attr(PREFIX+"-condition")
+		$("*[ac-target="+targetEl+"]").removeClass("active")
+		$(e.currentTarget).addClass("active")
 		if (condition && !appDataOP.execute(condition)) {
 			if (D) console.log("condition "+condition+" not satisfied")
 			return
 		}
 		if (D) console.log("condition "+condition+" satisfied")
 		if (href[0]==="/") {
-			href=href.slice(1,href.length)
+			href=href.slice(1)
 		}
 		if (D) console.log("href is",href)
-		if (currFragment!==href) {
+		if (true || currFragment!==href) {
 			if (D) console.log("currFragment",targetEl)
 			var t=$(targetEl)
 			if (!t[0]) {
@@ -205,7 +226,10 @@ $(document).ready(function(){
 			t.attr(PREFIX+"-fragment",href)
 			t.attr(PREFIX+"-dataSource",$(e.currentTarget).attr(PREFIX+"-dataSource") || "")
 			loadFragment(t[0])
-			window.location.hash="#!main="+href+"&ds="+t.attr(PREFIX+"-dataSource")
+			var target=targetEl.slice(1)
+			locationHash[target]=href
+			locationHash[target+"_ds"]=t.attr(PREFIX+"-dataSource")
+			updateHash()
 		}
 		if (D) console.log(e.currentTarget,targetEl,href)
 	})
