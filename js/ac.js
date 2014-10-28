@@ -1,52 +1,18 @@
-var count=0
-document.write=function(t){
-	console.log(scriptid)
-	var script=$("*[id="+scriptid+"]")
-	console.log(script)
-	script.after(t)
-	console.log(count++)
-}
-
-var log=function() {
-	try {
-		// this works in Firefox/Opera
-		console.log.apply( this, arguments );
-	} catch (e) {
-		// this is for Chrome/IE
-		var args = [], i = 0;
-		while( i++ < arguments.length )
-			args.push('arg' + i);
-
-		new Function( args, 'console.log(' + args.join( ',' ) + ')' ).
-		apply(null, arguments);
-	}
-}
+// onAvailable from https://github.com/furf/jquery-onavailable
+(function(A){A.extend({onAvailable:function(C,F){if(typeof F!=="function"){throw new TypeError();}var E=A.onAvailable;if(!(C instanceof Array)){C=[C];}for(var B=0,D=C.length;B<D;++B){E.listeners.push({id:C[B],callback:F,obj:arguments[2],override:arguments[3],checkContent:!!arguments[4]});}if(!E.interval){E.interval=window.setInterval(E.checkAvailable,E.POLL_INTERVAL);}return this;},onContentReady:function(C,E,D,B){A.onAvailable(C,E,D,B,true);}});A.extend(A.onAvailable,{POLL_RETRIES:2000,POLL_INTERVAL:20,interval:null,listeners:[],executeCallback:function(C,D){var B=C;if(D.override){if(D.override===true){B=D.obj;}else{B=D.override;}}D.callback.call(B,D.obj);},checkAvailable:function(){var F=A.onAvailable;var D=F.listeners;for(var B=0;B<D.length;++B){var E=D[B];var C=$(E.id);if(C[0]&&(!E.checkContent||(E.checkContent&&(C.nextSibling||C.parentNode.nextSibling||A.isReady)))){F.executeCallback(C,E);D.splice(B,1);--B;}if(D.length===0||--F.POLL_RETRIES===0){F.interval=window.clearInterval(F.interval);}}}});})(jQuery);
 
 function getHashParams() {
-    var hashParams = {};
-    var e,
-        a = /\+/g,  // Regex for replacing addition symbol with a space
-        r = /([^&;=]+)=?([^&;]*)/g,
-        d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
-        q = window.location.hash.substring(2)
+	var hashParams = {};
+	var e,
+			a = /\+/g,  // Regex for replacing addition symbol with a space
+			r = /([^&;=]+)=?([^&;]*)/g,
+			d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+			q = window.location.hash.substring(2);
 
-    while (e = r.exec(q))
-       hashParams[d(e[1])] = d(e[2]);
+	while (e = r.exec(q))
+		hashParams[d(e[1])] = d(e[2]);
 
-    return hashParams;
-}
-
-function fixScriptTags(node) {
-	console.log("START fixScriptTags with ",node)
-	$(node).find("script").each(function(n){
-		if ($(this).attr("id")) {
-			return
-		}
-		var id="js"+$.now()
-		$(this).attr("id",id)
-		this.innerHTML="scriptid=\""+id+"\";\n"+this.innerHTML
-		console.log(this)
-	})
+	return hashParams;
 }
 
 var PREFIX="ac",
@@ -56,18 +22,14 @@ var PREFIX="ac",
 		RE_PATH_Mustashes=/{{.+?}}/g // {{OPexpr},
 		RE_PATH_Mustashes_split=/{{.+?}}/g,
 		state=null,
-		scriptid=null
+		D=DEBUG=false
 
 $(document).ready(function(){
 	//var
 	appDataOP=new objectPath(appData)
 
-	//state=$.parseJSON(hash.substring(2,hash.length))
-	//var updateState=function(state){
-	//}
-
 	var replaceVars=function(s){
-		//log("START: replaceVars within string:",s)
+		//console.log("START: replaceVars within string:",s)
 		s=s.replace(/<!--[\s\S]*?-->/g, "")
 		var variables=s.match(RE_PATH_Mustashes)
 		if (!variables) {
@@ -75,34 +37,37 @@ $(document).ready(function(){
 		}
 		var splitted=s.split(RE_PATH_Mustashes_split),
 				result=[]
-		//log(splitted.length)
-		//log(variables.length)
+		//console.log(splitted.length)
+		//console.log(variables.length)
 		$.each(splitted,function(n,e){
-			//log(variables.length,variables[0])
+			//console.log(variables.length,variables[0])
 			var v=variables.length?appDataOP.execute(variables.shift().slice(2,-2)) : ""
-			//log(appData)
-			//log(v)
+			//console.log(appData)
+			//console.log(v)
 			result.push(e,v)
 		})
-		//log("END: replaceVars with string:",result.join(""))
+		//console.log("END: replaceVars with string:",result.join(""))
 		return result.join("")
 	}
 
 	var template=function(n,node){
-		//log("START: template with node:",node)
-		var root=appDataOP.execute($(node).attr(PREFIX+"-datasource")),
-				temp=node.innerHTML.replace(/ ac-datasource=".*"/,""),
-				result=[]
-		//log(temp)
+		if (D) console.log("START: template with node:",node)
+		var root=appDataOP.execute($(node).attr(PREFIX+"-datapath")),
+			temp=node.innerHTML.replace(/ ac-datapath=".*"/,""),
+			result=[]
+		//console.log(root)
+		var cache=appDataOP.current
 		$(root).each(function(n,o){
-			//log(o)
 			appDataOP.setCurrent(o)
 			result.push(replaceVars(temp))
-			//log("REP ",replaceVars(temp))
+			//console.log("REP ",replaceVars(temp))
 		})
-		appDataOP.resetCurrent()
+		appDataOP.setCurrent(cache)
+		//appDataOP.resetCurrent()
 		node.innerHTML=result.join("")
-		//log("END: template",result.join(""))
+		var ds=$("*["+PREFIX+"-datapath]",node)
+		//ds.each(template)
+		if (D) console.log("END: template",result.join(""))
 	}
 
 	var x=$.ajax({
@@ -111,8 +76,8 @@ $(document).ready(function(){
 			appData.locale=locale=data
 			//updateLocales()
 		},
-		error:function(a,b,c,d){
-			console.error("Locale file at /locale/"+$("html").attr("lang")+".json not found!")
+		error:function(e,b,c,d){
+			console.error("Problem with Locale file at /locale/"+$("html").attr("lang")+".json\n", c)
 		},
 		dataType:"json",
 		async:false
@@ -120,33 +85,35 @@ $(document).ready(function(){
 
 	var loadFragment=function(n,node){
 		node=node || n
-		//log("START: each with node:",node)
+		if (D) console.log("START: each with node:",node)
 		var condition=$(node).attr(PREFIX+"-condition")
 		if (condition && !appDataOP.execute(condition)) {
-			console.warning("condition ", condition," not satisfied")
+			console.log("condition ", condition," not satisfied")
 			return
 		}
-		var URL=$(node).attr(PREFIX+"-data")
+		var URL=$(node).attr(PREFIX+"-dataSource")
 		if (URL) {
-			//log("URL is:",URL)
+			if (D) console.log("URL is:",URL)
 			if (URL[URL.length]==="/") {
 				URL=URL.slice(0,URL.length-1)
 			}
 			if (URL[0]!=="/") {
 				URL="/"+URL
 			}
-			var path=URL.replace("/",".")
+			var path=URL.replace(/\//g,".")
 			if (path===".default") {
 				path=""
 			}
-			if (!path || !appDataOP.execute("$"+path)) {
+			if (D) console.log(path)
+			if (!path || !appDataOP.execute("$"+path.replace(/\./g,"'.'").slice(1)+"'")) {
 				$.ajax({
-					url:URL+"/",
+					url:"/api/"+URL+"/",
 					success:function(data){
 						if (!path) {
 							$.extend(appData,data,true)
 						}else{
 							set(appData,path.slice(1,path.length),data)
+							appDataOP.setCurrent(data)
 						}
 					},
 					error:function(){
@@ -160,57 +127,53 @@ $(document).ready(function(){
 		$.ajax({
 			url:"/fragments/"+$(node).attr(PREFIX+"-fragment")+".html",
 			success:function(data){
-				//log("START: AJAX success with data:",data)
-				node.innerHTML="<div class='hide'><script> </script>"+data+"</div>"
-				fixScriptTags($(node))
+				if (D) console.log("START: AJAX success with data:",data)
+				node.innerHTML="<div class='hide'>"+data+"</div>"
 				loadFragments(node)
 				var nodesWithConditions=$("*["+PREFIX+"-condition]",node)
 				nodesWithConditions.each(function(e){
 					if (!appDataOP.execute($(this).attr(PREFIX+"-condition"))) {
-						console.warning("condition",$(this).attr(PREFIX+"-condition"),"not satisfied")
-						//log(!appDataOP.execute($(this).attr(PREFIX+"-condition")))
+						if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"not satisfied")
+						//console.log(!appDataOP.execute($(this).attr(PREFIX+"-condition")))
 						$(this).remove()
 					}else{
-						console.info("condition",$(this).attr(PREFIX+"-condition"),"satisfied")
+						if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"satisfied")
 					}
 				})
-				var ds=$("*["+PREFIX+"-datasource]",node)
+				var ds=$(":not(*["+PREFIX+"-datapath]) *["+PREFIX+"-datapath]",node)
+				if (D) console.log("DS!",ds)
 				// This is slow - a proff of concept only!
 				if(ds.length){
-					//log("datasource found!")
+					if (D) console.log("datasource found!")
 					ds.each(template)
 				}
-				// IDK how (or if) append is slower than append but innerHTML doesn't execute embedded scripts
-				//node.innerHTML=replaceVars($(node).children().html())
-				//alert(replaceVars($(node).children().html()))
-				var help=replaceVars($(node).children().html())
-				$(node).empty("*")
-				$(node).append(help)
-				//log("END: AJAX success")
+				node.innerHTML=replaceVars($(node).children().html())
+				if (D) console.log("END: AJAX success")
 			},
 			error:function(){
-				console.error("Fragment file at /fragments/"+$("html").attr("lang")+"not found!")
+				if (D) console.error("Fragment file at /fragments/"+$("html").attr("lang")+"not found!")
 			},
 			async:false,
-			dataType:"text"
+			dataType:"html"
 		})
-		//log("END: each")
+		if (D) console.log("END: each")
 	}
 
 	var loadFragments=function(context){
-		//log("START: loadFragments with context",context)
+		if (D) console.log("START: loadFragments with context",context)
 		// HTML fragments PJAX
-		//log("fragments found:",$("*["+PREFIX+"-fragment]",context))
+		if (D) console.log("fragments found:",$("*["+PREFIX+"-fragment]",context))
 		$("*["+PREFIX+"-fragment]",context).each(loadFragment)
-		//log("END: fragments")
+		if (D) console.log("END: fragments")
 	}
 	loadFragments(document)
 
 	state=getHashParams()
+	if (D) console.log(state)
 	var refreshState=function(){
 		if (state.main) {
 			$("#main").attr(PREFIX+"-fragment",state.main)
-								.attr(PREFIX+"-data",state.data)
+								.attr(PREFIX+"-dataSource",state.ds)
 			loadFragment($("#main")[0])
 		}
 	}
@@ -224,27 +187,27 @@ $(document).ready(function(){
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
 				condition=$(e.currentTarget).attr(PREFIX+"-condition")
 		if (condition && !appDataOP.execute(condition)) {
-			console.warning("condition "+condition+" not satisfied")
+			if (D) console.log("condition "+condition+" not satisfied")
 			return
 		}
-		console.info("condition "+condition+" satisfied")
+		if (D) console.log("condition "+condition+" satisfied")
 		if (href[0]==="/") {
 			href=href.slice(1,href.length)
 		}
-		//log("href is",href)
+		if (D) console.log("href is",href)
 		if (currFragment!==href) {
-			//log("currFragment",targetEl)
+			if (D) console.log("currFragment",targetEl)
 			var t=$(targetEl)
 			if (!t[0]) {
 				console.error("Target element "+targetEl+" not found!")
 				return
 			}
 			t.attr(PREFIX+"-fragment",href)
-			t.attr(PREFIX+"-data",$(e.currentTarget).attr(PREFIX+"-data") || "")
+			t.attr(PREFIX+"-dataSource",$(e.currentTarget).attr(PREFIX+"-dataSource") || "")
 			loadFragment(t[0])
-			window.location.hash="#!main="+href+"&data="+t.attr(PREFIX+"-data")
+			window.location.hash="#!main="+href+"&ds="+t.attr(PREFIX+"-dataSource")
 		}
-		//log(e.currentTarget,targetEl,href)
+		if (D) console.log(e.currentTarget,targetEl,href)
 	})
 })
 
