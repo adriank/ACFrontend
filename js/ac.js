@@ -248,41 +248,41 @@ $(document).ready(function(){
 	$.onAvailable("form", function(){
 		this.attr("method","POST")
 		this.attr("enctype","multipart/form-data")
-		this.on("submit",function(e){
-			e.preventDefault()
-			var self=$(this)
-			var targetEl=self.attr(PREFIX+"-target"),
-					href=self.attr("href"),
-					currFragment=$(targetEl).attr(PREFIX+"-fragment"),
-					condition=self.attr(PREFIX+"-condition")
+	})
+	$("body").on("submit","form",function(e){
+		e.preventDefault()
+		var self=$(this)
+		var targetEl=self.attr(PREFIX+"-target"),
+				href=self.attr("href"),
+				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
+				condition=self.attr(PREFIX+"-condition")
 
-			if (condition && !appDataOP.execute(condition)) {
-				if (D) console.log("condition "+condition+" not satisfied")
+		if (condition && !appDataOP.execute(condition)) {
+			if (D) console.log("condition "+condition+" not satisfied")
+			return
+		}
+		if (D) console.log("condition "+condition+" satisfied")
+
+		if (href[0]==="/") {
+			href=href.slice(1)
+		}
+		if (D) console.log("href is",href)
+		if (true || currFragment!==href) {
+			if (D) console.log("currFragment",targetEl)
+			var t=$(targetEl)
+			if (!t[0]) {
+				console.error("Target element "+targetEl+" not found!")
 				return
 			}
-			if (D) console.log("condition "+condition+" satisfied")
-
-			if (href[0]==="/") {
-				href=href.slice(1)
-			}
-			if (D) console.log("href is",href)
-			if (true || currFragment!==href) {
-				if (D) console.log("currFragment",targetEl)
-				var t=$(targetEl)
-				if (!t[0]) {
-					console.error("Target element "+targetEl+" not found!")
-					return
-				}
-				t.attr(PREFIX+"-fragment",href)
-				t.attr(PREFIX+"-dataSource",self.attr("action"))
-				t.attr(PREFIX+"-post",self.serialize())
-				loadFragment(t[0])
-				//var target=targetEl.slice(1)
-				//locationHash[target]=href
-				//locationHash[target+"_ds"]=self.attr("action")
-				//updateHash()
-			}
-		})
+			t.attr(PREFIX+"-fragment",href)
+			t.attr(PREFIX+"-dataSource",self.attr("action"))
+			t.attr(PREFIX+"-post",self.serialize())
+			loadFragment(t[0])
+			var target=targetEl.slice(1)
+			locationHash[target]=href
+			locationHash[target+"_ds"]=self.attr("action")
+			updateHash()
+		}
 	})
 })
 
