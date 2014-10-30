@@ -25,7 +25,7 @@ var PREFIX="ac",
 		locationHash={},
 		D=DEBUG=false
 
-D=true
+//D=true
 
 var updateHash=function(){
 	var h=[]
@@ -120,15 +120,17 @@ $(document).ready(function(){
 			if (path===".default") {
 				path=""
 			}
-			if (D) console.log(path)
-			if (!path || !appDataOP.execute("$"+path.replace(/\./g,"'.'").slice(1)+"'")) {
-				$.ajax({
+			if (D) console.log("path", path)
+			// TODO bring back this optimization
+			if (true || !path || !appDataOP.execute("$"+path.replace(/\./g,"'.'").slice(1)+"'")) {
+				var conf={
 					url:"/api/"+URL+"/",
 					success:function(data){
 						if (!path) {
 							$.extend(appData,data,true)
 						}else{
 							set(appData,path.slice(1,path.length),data)
+							appDataOP.setContext(data)
 							appDataOP.setCurrent(data)
 						}
 					},
@@ -137,7 +139,13 @@ $(document).ready(function(){
 					},
 					dataType:"json",
 					async:false
-				})
+				}
+				var post=$(node).attr(PREFIX+"-post")
+				if (post) {
+					conf["type"]="POST"
+					conf["data"]=post
+				}
+				$.ajax(conf)
 			}
 		}
 		$.ajax({
@@ -216,6 +224,7 @@ $(document).ready(function(){
 			href=href.slice(1)
 		}
 		if (D) console.log("href is",href)
+		// TODO bring back this optimization
 		if (true || currFragment!==href) {
 			if (D) console.log("currFragment",targetEl)
 			var t=$(targetEl)
@@ -232,6 +241,48 @@ $(document).ready(function(){
 			updateHash()
 		}
 		if (D) console.log(e.currentTarget,targetEl,href)
+	})
+
+
+	// TODO, optimization: check if $("body").on("submit","form",...) works
+	$.onAvailable("form", function(){
+		this.attr("method","POST")
+		this.attr("enctype","multipart/form-data")
+		this.on("submit",function(e){
+			e.preventDefault()
+			var self=$(this)
+			var targetEl=self.attr(PREFIX+"-target"),
+					href=self.attr("href"),
+					currFragment=$(targetEl).attr(PREFIX+"-fragment"),
+					condition=self.attr(PREFIX+"-condition")
+
+			if (condition && !appDataOP.execute(condition)) {
+				if (D) console.log("condition "+condition+" not satisfied")
+				return
+			}
+			if (D) console.log("condition "+condition+" satisfied")
+
+			if (href[0]==="/") {
+				href=href.slice(1)
+			}
+			if (D) console.log("href is",href)
+			if (true || currFragment!==href) {
+				if (D) console.log("currFragment",targetEl)
+				var t=$(targetEl)
+				if (!t[0]) {
+					console.error("Target element "+targetEl+" not found!")
+					return
+				}
+				t.attr(PREFIX+"-fragment",href)
+				t.attr(PREFIX+"-dataSource",self.attr("action"))
+				t.attr(PREFIX+"-post",self.serialize())
+				loadFragment(t[0])
+				//var target=targetEl.slice(1)
+				//locationHash[target]=href
+				//locationHash[target+"_ds"]=self.attr("action")
+				//updateHash()
+			}
+		})
 	})
 })
 
