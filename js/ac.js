@@ -69,8 +69,7 @@ hashWorker.prototype={
 		$.each(o, function(k,o){
 			self.params[k]=o
 		})
-		//if (D)
-		console.log(this.params)
+		if (D) console.log(this.params)
 		window.location.hash=this.makeHash()
 	}
 }
@@ -225,7 +224,6 @@ $(document).ready(function(){
 	refreshState()
 
 	//window.onhashchange=refreshState
-	alert(PREFIX)
 
 	$("body").on("click","a["+PREFIX+"-target]",function(e){
 		e.preventDefault()
