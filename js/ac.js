@@ -1,103 +1,84 @@
 // onAvailable from https://github.com/furf/jquery-onavailable
 (function(A){A.extend({onAvailable:function(C,F){if(typeof F!=="function"){throw new TypeError();}var E=A.onAvailable;if(!(C instanceof Array)){C=[C];}for(var B=0,D=C.length;B<D;++B){E.listeners.push({id:C[B],callback:F,obj:arguments[2],override:arguments[3],checkContent:!!arguments[4]});}if(!E.interval){E.interval=window.setInterval(E.checkAvailable,E.POLL_INTERVAL);}return this;},onContentReady:function(C,E,D,B){A.onAvailable(C,E,D,B,true);}});A.extend(A.onAvailable,{POLL_RETRIES:2000,POLL_INTERVAL:20,interval:null,listeners:[],executeCallback:function(C,D){var B=C;if(D.override){if(D.override===true){B=D.obj;}else{B=D.override;}}D.callback.call(B,D.obj);},checkAvailable:function(){var F=A.onAvailable;var D=F.listeners;for(var B=0;B<D.length;++B){var E=D[B];var C=$(E.id);if(C[0]&&(!E.checkContent||(E.checkContent&&(C.nextSibling||C.parentNode.nextSibling||A.isReady)))){F.executeCallback(C,E);D.splice(B,1);--B;}if(D.length===0||--F.POLL_RETRIES===0){F.interval=window.clearInterval(F.interval);}}}});})(jQuery);
 
-function getHashParams() {
-	var hashParams = {};
-	var e,
-			a = /\+/g,  // Regex for replacing addition symbol with a space
-			r = /([^&;=]+)=?([^&;]*)/g,
-			d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
-			q = window.location.hash.substring(2);
-
-	while (e = r.exec(q))
-		hashParams[d(e[1])] = d(e[2]);
-
-	return hashParams;
-}
-
 var PREFIX="ac",
 		locale={},
 		lang=$("html").attr("lang") || "en",
 		appData={},
+		appDataOP=new objectPath(appData),
 		RE_PATH_Mustashes=/{{.+?}}/g // {{OPexpr},
 		RE_PATH_Mustashes_split=/{{.+?}}/g,
-		state=null,
-		locationHash={},
 		D=DEBUG=false
 
-//D=true
+D=true
 
-var updateHash=function(){
-	var h=[]
-	$.each(locationHash, function(k,o){
-		h.push(k+"="+o)
+var replaceVars=function(s){
+	//console.log("START: replaceVars within string:",s)
+	s=s.replace(/<!--[\s\S]*?-->/g, "")
+	var variables=s.match(RE_PATH_Mustashes)
+	if (!variables) {
+		return s
+	}
+	var splitted=s.split(RE_PATH_Mustashes_split),
+			result=[]
+	//console.log(splitted.length)
+	//console.log(variables.length)
+	$.each(splitted,function(n,e){
+		//console.log(variables.length,variables[0])
+		var v=variables.length?appDataOP.execute(variables.shift().slice(2,-2)) : ""
+		//console.log(appData)
+		//console.log(v)
+		if (v instanceof Object) {
+			v=JSON.stringify(v, null, 2)
+		}
+		result.push(e, v)
 	})
-	h="#!"+h.join("&")
-	if (D) console.log(h)
-	window.location.hash=h
+	//console.log("END: replaceVars with string:",result.join(""))
+	return result.join("")
 }
 
+var hashWorker=function(){
+	this.params={}
+	this.get()
+}
+
+hashWorker.prototype={
+	get:function(){
+		var hashParams = {};
+		var e,
+				a = /\+/g,  // Regex for replacing addition symbol with a space
+				r = /([^&;=]+)=?([^&;]*)/g,
+				d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+				q = window.location.hash.substring(2);
+
+		while (e = r.exec(q))
+			hashParams[d(e[1])] = d(e[2]);
+
+		this.params=hashParams
+		return hashParams
+	},
+	makeHash:function(){
+		var h=[]
+		$.each(this.params, function(k,o){
+			h.push(k+"="+o)
+		})
+		return "#!"+h.join("&")
+	},
+	update:function(o){
+		var self=this
+		$.each(o, function(k,o){
+			self.params[k]=o
+		})
+		//if (D)
+		console.log(this.params)
+		window.location.hash=this.makeHash()
+	}
+}
+
+var locationHash=new hashWorker()
+
 $(document).ready(function(){
-	//var
-	appDataOP=new objectPath(appData)
-
-	var replaceVars=function(s){
-		//console.log("START: replaceVars within string:",s)
-		s=s.replace(/<!--[\s\S]*?-->/g, "")
-		var variables=s.match(RE_PATH_Mustashes)
-		if (!variables) {
-			return s
-		}
-		var splitted=s.split(RE_PATH_Mustashes_split),
-				result=[]
-		//console.log(splitted.length)
-		//console.log(variables.length)
-		$.each(splitted,function(n,e){
-			//console.log(variables.length,variables[0])
-			var v=variables.length?appDataOP.execute(variables.shift().slice(2,-2)) : ""
-			//console.log(appData)
-			//console.log(v)
-			if (v instanceof Object) {
-				v=JSON.stringify(v, null, 2)
-			}
-			result.push(e, v)
-		})
-		//console.log("END: replaceVars with string:",result.join(""))
-		return result.join("")
-	}
-
-	var template=function(n,node){
-		if (D) console.log("START: template with node:",node)
-		var root=appDataOP.execute($(node).attr(PREFIX+"-datapath")),
-			temp=node.innerHTML.replace(/ ac-datapath=".*"/,""),
-			result=[]
-		//console.log(root)
-		var cache=appDataOP.current
-		$(root).each(function(n,o){
-			appDataOP.setCurrent(o)
-			result.push(replaceVars(temp))
-			//console.log("REP ",replaceVars(temp))
-		})
-		appDataOP.setCurrent(cache)
-		//appDataOP.resetCurrent()
-		node.innerHTML=result.join("")
-		var ds=$("*["+PREFIX+"-datapath]",node)
-		//ds.each(template)
-		if (D) console.log("END: template",result.join(""))
-	}
-
-	var x=$.ajax({
-		url:"/locale/"+$("html").attr("lang")+".json",
-		success:function(data){
-			appData.locale=locale=data
-			//updateLocales()
-		},
-		error:function(e,b,c,d){
-			console.error("Problem with Locale file at /locale/"+$("html").attr("lang")+".json\n", c)
-		},
-		dataType:"json",
-		async:false
-	})
+	var	lang=$("html").attr("lang") || "en"
 
 	var loadFragment=function(n,node){
 		node=node || n
@@ -190,22 +171,61 @@ $(document).ready(function(){
 		$("*["+PREFIX+"-fragment]",context).each(loadFragment)
 		if (D) console.log("END: fragments")
 	}
+
+	var template=function(n,node){
+		if (D) console.log("START: template with node:",node)
+		var root=appDataOP.execute($(node).attr(PREFIX+"-datapath")),
+			temp=node.innerHTML.replace(/ ac-datapath=".*"/,""),
+			result=[]
+		//console.log(root)
+		var cache=appDataOP.current
+		$(root).each(function(n,o){
+			appDataOP.setCurrent(o)
+			result.push(replaceVars(temp))
+			//console.log("REP ",replaceVars(temp))
+		})
+		appDataOP.setCurrent(cache)
+		//appDataOP.resetCurrent()
+		node.innerHTML=result.join("")
+		var ds=$("*["+PREFIX+"-datapath]",node)
+		//ds.each(template)
+		if (D) console.log("END: template",result.join(""))
+	}
+
+	var x=$.ajax({
+		url:"/locale/"+$("html").attr("lang")+".json",
+		success:function(data){
+			appData.locale=locale=data
+			//updateLocales()
+		},
+		error:function(e,b,c,d){
+			console.error("Problem with Locale file at /locale/"+$("html").attr("lang")+".json\n", c)
+		},
+		dataType:"json",
+		async:false
+	})
+
 	loadFragments(document)
 
-	state=getHashParams()
-	if (D) console.log("hash state", state)
+	//if (D) console.log("hash state", state)
+
 	var refreshState=function(){
-		$.each(state,function(k,o){
+		var state=locationHash.params
+		$.each(state, function(k,o){
 			if (k.indexOf("_ds")!==-1) {
 				return
 			}
 			$("#"+k).attr(PREFIX+"-fragment",state[k])
-								.attr(PREFIX+"-dataSource",state[k+"_ds"])
+							.attr(PREFIX+"-dataSource",state[k+"_ds"])
 			loadFragment($("#"+k)[0])
 		})
 	}
+
+	//var r=locationHash.
 	refreshState()
+
 	//window.onhashchange=refreshState
+	alert(PREFIX)
 
 	$("body").on("click","a["+PREFIX+"-target]",function(e){
 		e.preventDefault()
@@ -236,9 +256,10 @@ $(document).ready(function(){
 			t.attr(PREFIX+"-dataSource",$(e.currentTarget).attr(PREFIX+"-dataSource") || "")
 			loadFragment(t[0])
 			var target=targetEl.slice(1)
-			locationHash[target]=href
-			locationHash[target+"_ds"]=t.attr(PREFIX+"-dataSource")
-			updateHash()
+			var d={}
+			d[target]=href
+			d[target+"_ds"]=t.attr(PREFIX+"-dataSource")
+			locationHash.update(d)
 		}
 		if (D) console.log(e.currentTarget,targetEl,href)
 	})
@@ -249,13 +270,30 @@ $(document).ready(function(){
 		this.attr("method","POST")
 		this.attr("enctype","multipart/form-data")
 	})
-	$("body").on("submit","form",function(e){
+
+	//$("body").on("submit", "form", function(e){
+	//	e.preventDefault()
+	//})
+
+	//$("body").on("submit", "form["+PREFIX+"-target]", function(e){
+	$("body").on("submit", "form", function(e){
 		e.preventDefault()
 		var self=$(this)
 		var targetEl=self.attr(PREFIX+"-target"),
 				href=self.attr("href"),
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
 				condition=self.attr(PREFIX+"-condition")
+
+		if (!targetEl) {
+			$.post()(
+				self.attr("action"),
+				self.serialize(),
+				function(e) {
+					console.log(e)
+				}
+			)
+			return
+		}
 
 		if (condition && !appDataOP.execute(condition)) {
 			if (D) console.log("condition "+condition+" not satisfied")
@@ -279,9 +317,10 @@ $(document).ready(function(){
 			t.attr(PREFIX+"-post",self.serialize())
 			loadFragment(t[0])
 			var target=targetEl.slice(1)
-			locationHash[target]=href
-			locationHash[target+"_ds"]=self.attr("action")
-			updateHash()
+			var d={}
+			d[target]=href
+			d[target+"_ds"]=self.attr("action")
+			locationHash.update(d)
 		}
 	})
 })
