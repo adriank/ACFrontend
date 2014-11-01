@@ -10,7 +10,7 @@ var PREFIX="ac",
 		RE_PATH_Mustashes_split=/{{.+?}}/g,
 		D=DEBUG=false
 
-D=true
+//D=true
 
 var replaceVars=function(s){
 	//console.log("START: replaceVars within string:",s)
@@ -75,6 +75,30 @@ hashWorker.prototype={
 }
 
 var locationHash=new hashWorker()
+
+var addSpinner=function(el){
+	el.attr("title","Waiting for response")
+	el.find(".ac-spin").remove()
+	el.append(" <i class='fa fa-spinner fa-spin ac-spin'></i>")
+}
+
+var removeSpinner=function(el){
+	el.removeAttr("title")
+	var spinner=el.find(".fa-spin")
+	spinner.removeClass("fa-spinner fa-spin")
+				 .addClass("fa-check")
+				 .addClass("hide-delay")
+	setTimeout(function(){spinner.remove()},1200)
+}
+
+var errorSpinner=function(el, err){
+	el.attr("title","Error! "+err)
+	var spinner=el.find(".fa-spin")
+	spinner.removeClass("fa-spinner fa-spin")
+				 .addClass("fa-warning")
+		//.addClass("hide-delay")
+	//setTimeout(function(){spinner.remove()},1200)
+}
 
 $(document).ready(function(){
 	var	lang=$("html").attr("lang") || "en"
@@ -227,12 +251,15 @@ $(document).ready(function(){
 
 	$("body").on("click","a["+PREFIX+"-target]",function(e){
 		e.preventDefault()
-		var targetEl=$(e.currentTarget).attr(PREFIX+"-target"),
-				href=$(e.currentTarget).attr("href"),
+		var currentTarget=$(e.currentTarget)
+				targetEl=currentTarget.attr(PREFIX+"-target"),
+				href=currentTarget.attr("href"),
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
-				condition=$(e.currentTarget).attr(PREFIX+"-condition")
+				condition=currentTarget.attr(PREFIX+"-condition")
+
 		$("*[ac-target="+targetEl+"]").removeClass("active")
-		$(e.currentTarget).addClass("active")
+		currentTarget.addClass("active")
+		addSpinner(currentTarget)
 		if (condition && !appDataOP.execute(condition)) {
 			if (D) console.log("condition "+condition+" not satisfied")
 			return
@@ -251,8 +278,9 @@ $(document).ready(function(){
 				return
 			}
 			t.attr(PREFIX+"-fragment",href)
-			t.attr(PREFIX+"-dataSource",$(e.currentTarget).attr(PREFIX+"-dataSource") || "")
+			t.attr(PREFIX+"-dataSource",currentTarget.attr(PREFIX+"-dataSource") || "")
 			loadFragment(t[0])
+			removeSpinner(currentTarget)
 			var target=targetEl.slice(1)
 			var d={}
 			d[target]=href
@@ -269,11 +297,6 @@ $(document).ready(function(){
 		this.attr("enctype","multipart/form-data")
 	})
 
-	//$("body").on("submit", "form", function(e){
-	//	e.preventDefault()
-	//})
-
-	//$("body").on("submit", "form["+PREFIX+"-target]", function(e){
 	$("body").on("submit", "form", function(e){
 		e.preventDefault()
 		var self=$(this)
@@ -283,13 +306,28 @@ $(document).ready(function(){
 				condition=self.attr(PREFIX+"-condition")
 
 		if (!targetEl) {
-			$.post()(
-				self.attr("action"),
-				self.serialize(),
-				function(e) {
-					console.log(e)
-				}
-			)
+			var btn=$(e.originalEvent.explicitOriginalTarget)
+			addSpinner(btn)
+			$.ajax({
+				url: "/api"+self.attr("action"),
+				data: self.serialize(),
+				success: function(e) {
+					removeSpinner(btn)
+					var r=self.attr(PREFIX+"-redirect")
+					if (r) {
+						window.location=r
+					}
+				},
+				error:function(e, status, error){
+					console.log(error)
+					try{
+						errorSpinner(btn, e.responseJSON.GlobalError.message)
+					}catch(TypeError){
+						errorSpinner(btn, error || "Server not responding.")
+					}
+				},
+				type:"POST"
+			})
 			return
 		}
 
