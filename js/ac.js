@@ -2,7 +2,6 @@
 (function(A){A.extend({onAvailable:function(C,F){if(typeof F!=="function"){throw new TypeError();}var E=A.onAvailable;if(!(C instanceof Array)){C=[C];}for(var B=0,D=C.length;B<D;++B){E.listeners.push({id:C[B],callback:F,obj:arguments[2],override:arguments[3],checkContent:!!arguments[4]});}if(!E.interval){E.interval=window.setInterval(E.checkAvailable,E.POLL_INTERVAL);}return this;},onContentReady:function(C,E,D,B){A.onAvailable(C,E,D,B,true);}});A.extend(A.onAvailable,{POLL_RETRIES:2000,POLL_INTERVAL:20,interval:null,listeners:[],executeCallback:function(C,D){var B=C;if(D.override){if(D.override===true){B=D.obj;}else{B=D.override;}}D.callback.call(B,D.obj);},checkAvailable:function(){var F=A.onAvailable;var D=F.listeners;for(var B=0;B<D.length;++B){var E=D[B];var C=$(E.id);if(C[0]&&(!E.checkContent||(E.checkContent&&(C.nextSibling||C.parentNode.nextSibling||A.isReady)))){F.executeCallback(C,E);D.splice(B,1);--B;}if(D.length===0||--F.POLL_RETRIES===0){F.interval=window.clearInterval(F.interval);}}}});})(jQuery);
 
 var PREFIX="ac",
-		ac={}
 		locale={},
 		lang=$("html").attr("lang") || "en",
 		appData={},
@@ -12,6 +11,10 @@ var PREFIX="ac",
 		D=DEBUG=false
 
 //D=true
+
+var ac={
+	"components":{}
+}
 
 var triggers=[]
 ac.onAvailable=function(selector,fn){
@@ -170,15 +173,20 @@ $(document).ready(function(){
 			$.ajax({
 				url:"/fragments/"+$(node).attr(PREFIX+"-fragment")+".html",
 				success:function(data){
+					if ($(node).attr(PREFIX+"-fragment")==="/IDE/API-files") {
+						D=true
+					}
 					if (D) console.log("START: AJAX success with data:",data)
 					node.innerHTML="<div class='hide'>"+data+"</div>"
+					if (D) console.log("NODE",node)
 					loadFragments(node)
-					var ds=$(":not(*["+PREFIX+"-datapath]) *["+PREFIX+"-datapath]",node)
-					if (D) console.log("DS!",ds)
+					var dp=$(":not(*["+PREFIX+"-datapath]) *["+PREFIX+"-datapath]",node)
+					if (D) console.log("DS!",dp)
 					// This is slow - a proff of concept only!
-					if(ds.length){
-						if (D) console.log("datasource found!")
-						ds.each(template)
+					if(dp.length){
+						if (D) console.log("dataPath found!")
+						dp.each(template)
+						dp.removeAttr(PREFIX+"-datapath")
 					}
 					node.innerHTML=replaceVars($(node).children().html())
 					var nodesWithConditions=$("*["+PREFIX+"-condition]",node)
@@ -217,7 +225,6 @@ $(document).ready(function(){
 		var root=appDataOP.execute($(node).attr(PREFIX+"-datapath")),
 			temp=node.innerHTML.replace(/ ac-datapath=".*"/,""),
 			result=[]
-		//console.log(root)
 		var cache=appDataOP.current
 		$(root).each(function(n,o){
 			appDataOP.setCurrent(o)
@@ -226,14 +233,15 @@ $(document).ready(function(){
 			var node=$("#ac-helper")
 			node[0].innerHTML=replaceVars(temp)
 			var nodesWithConditions=node.find("*["+PREFIX+"-condition]")
-			console.log("nodesWithConditions", node)
+			if (D) console.log("nodesWithConditions", node)
 			nodesWithConditions.each(function(e){
-				if (!appDataOP.execute($(this).attr(PREFIX+"-condition"))) {
-					if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"not satisfied")
+				var con=$(this).attr(PREFIX+"-condition")
+				if (!appDataOP.execute(con)) {
+					if (D) console.log("condition",con,"not satisfied")
 					$(this).remove()
 				}else{
 					$(this).removeAttr(PREFIX+"-condition")
-					if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"satisfied")
+					if (D) console.log("condition",con,"satisfied")
 				}
 			})
 			//console.log(node[0].innerHTML)
@@ -244,9 +252,9 @@ $(document).ready(function(){
 		appDataOP.setCurrent(cache)
 		//appDataOP.resetCurrent()
 		node.innerHTML=result.join("")
-		var ds=$("*["+PREFIX+"-datapath]",node)
+		//var ds=$("*["+PREFIX+"-datapath]",node)
 		//ds.each(template)
-		if (D) console.log("END: template",result.join(""))
+		if (D) console.log("END: template", result.join(""))
 	}
 
 
@@ -285,6 +293,7 @@ $(document).ready(function(){
 	//window.onhashchange=refreshState
 
 	$("body").on("click","a["+PREFIX+"-target]",function(e){
+D=true
 		e.preventDefault()
 		var currentTarget=$(e.currentTarget)
 				targetEl=currentTarget.attr(PREFIX+"-target"),
@@ -292,7 +301,7 @@ $(document).ready(function(){
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
 				condition=currentTarget.attr(PREFIX+"-condition")
 
-		$("*[ac-target="+targetEl+"]").removeClass("active")
+		currentTarget.parents(".nav").find("*[ac-target="+targetEl+"].active").removeClass("active")
 		currentTarget.addClass("active")
 		addSpinner(currentTarget)
 		if (condition && !appDataOP.execute(condition)) {
