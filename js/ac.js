@@ -2,6 +2,7 @@
 (function(A){A.extend({onAvailable:function(C,F){if(typeof F!=="function"){throw new TypeError();}var E=A.onAvailable;if(!(C instanceof Array)){C=[C];}for(var B=0,D=C.length;B<D;++B){E.listeners.push({id:C[B],callback:F,obj:arguments[2],override:arguments[3],checkContent:!!arguments[4]});}if(!E.interval){E.interval=window.setInterval(E.checkAvailable,E.POLL_INTERVAL);}return this;},onContentReady:function(C,E,D,B){A.onAvailable(C,E,D,B,true);}});A.extend(A.onAvailable,{POLL_RETRIES:2000,POLL_INTERVAL:20,interval:null,listeners:[],executeCallback:function(C,D){var B=C;if(D.override){if(D.override===true){B=D.obj;}else{B=D.override;}}D.callback.call(B,D.obj);},checkAvailable:function(){var F=A.onAvailable;var D=F.listeners;for(var B=0;B<D.length;++B){var E=D[B];var C=$(E.id);if(C[0]&&(!E.checkContent||(E.checkContent&&(C.nextSibling||C.parentNode.nextSibling||A.isReady)))){F.executeCallback(C,E);D.splice(B,1);--B;}if(D.length===0||--F.POLL_RETRIES===0){F.interval=window.clearInterval(F.interval);}}}});})(jQuery);
 
 var PREFIX="ac",
+		ac={}
 		locale={},
 		lang=$("html").attr("lang") || "en",
 		appData={},
@@ -11,6 +12,18 @@ var PREFIX="ac",
 		D=DEBUG=false
 
 //D=true
+
+var triggers=[]
+ac.onAvailable=function(selector,fn){
+	triggers.push({"selector":selector,"fn":fn})
+	$.onAvailable(selector,fn)
+}
+
+ac.trigger=function(){
+	$.each(triggers, function(el){
+		$.onAvailable(this.selector, this.fn)
+	})
+}
 
 var replaceVars=function(s){
 	//console.log("START: replaceVars within string:",s)
@@ -152,38 +165,42 @@ $(document).ready(function(){
 				$.ajax(conf)
 			}
 		}
-		$.ajax({
-			url:"/fragments/"+$(node).attr(PREFIX+"-fragment")+".html",
-			success:function(data){
-				if (D) console.log("START: AJAX success with data:",data)
-				node.innerHTML="<div class='hide'>"+data+"</div>"
-				loadFragments(node)
-				var nodesWithConditions=$("*["+PREFIX+"-condition]",node)
-				nodesWithConditions.each(function(e){
-					if (!appDataOP.execute($(this).attr(PREFIX+"-condition"))) {
-						if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"not satisfied")
-						//console.log(!appDataOP.execute($(this).attr(PREFIX+"-condition")))
-						$(this).remove()
-					}else{
-						if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"satisfied")
+
+		if ($(node).attr(PREFIX+"-fragment")) {
+			$.ajax({
+				url:"/fragments/"+$(node).attr(PREFIX+"-fragment")+".html",
+				success:function(data){
+					if (D) console.log("START: AJAX success with data:",data)
+					node.innerHTML="<div class='hide'>"+data+"</div>"
+					loadFragments(node)
+					var ds=$(":not(*["+PREFIX+"-datapath]) *["+PREFIX+"-datapath]",node)
+					if (D) console.log("DS!",ds)
+					// This is slow - a proff of concept only!
+					if(ds.length){
+						if (D) console.log("datasource found!")
+						ds.each(template)
 					}
-				})
-				var ds=$(":not(*["+PREFIX+"-datapath]) *["+PREFIX+"-datapath]",node)
-				if (D) console.log("DS!",ds)
-				// This is slow - a proff of concept only!
-				if(ds.length){
-					if (D) console.log("datasource found!")
-					ds.each(template)
-				}
-				node.innerHTML=replaceVars($(node).children().html())
-				if (D) console.log("END: AJAX success")
-			},
-			error:function(){
-				if (D) console.error("Fragment file at /fragments/"+$("html").attr("lang")+"not found!")
-			},
-			async:false,
-			dataType:"html"
-		})
+					node.innerHTML=replaceVars($(node).children().html())
+					var nodesWithConditions=$("*["+PREFIX+"-condition]",node)
+					nodesWithConditions.each(function(e){
+						if (!appDataOP.execute($(this).attr(PREFIX+"-condition"))) {
+							//console.log("DATA",appDataOP.current)
+							if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"not satisfied")
+							//console.log(!appDataOP.execute($(this).attr(PREFIX+"-condition")))
+							$(this).remove()
+						}else{
+							if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"satisfied")
+						}
+					})
+					if (D) console.log("END: AJAX success")
+				},
+				error:function(){
+					if (D) console.error("Fragment file at /fragments/"+$("html").attr("lang")+"not found!")
+				},
+				async:false,
+				dataType:"html"
+			})
+		}
 		if (D) console.log("END: each")
 	}
 
@@ -204,7 +221,24 @@ $(document).ready(function(){
 		var cache=appDataOP.current
 		$(root).each(function(n,o){
 			appDataOP.setCurrent(o)
-			result.push(replaceVars(temp))
+			//console.log("DATA", o)
+			$("body").append("<span id='ac-helper' class='hide'></span>")
+			var node=$("#ac-helper")
+			node[0].innerHTML=replaceVars(temp)
+			var nodesWithConditions=node.find("*["+PREFIX+"-condition]")
+			console.log("nodesWithConditions", node)
+			nodesWithConditions.each(function(e){
+				if (!appDataOP.execute($(this).attr(PREFIX+"-condition"))) {
+					if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"not satisfied")
+					$(this).remove()
+				}else{
+					$(this).removeAttr(PREFIX+"-condition")
+					if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"satisfied")
+				}
+			})
+			//console.log(node[0].innerHTML)
+			result.push(node[0].innerHTML)
+			node.remove()
 			//console.log("REP ",replaceVars(temp))
 		})
 		appDataOP.setCurrent(cache)
@@ -214,6 +248,7 @@ $(document).ready(function(){
 		//ds.each(template)
 		if (D) console.log("END: template",result.join(""))
 	}
+
 
 	var x=$.ajax({
 		url:"/locale/"+$("html").attr("lang")+".json",
@@ -280,6 +315,7 @@ $(document).ready(function(){
 			t.attr(PREFIX+"-fragment",href)
 			t.attr(PREFIX+"-dataSource",currentTarget.attr(PREFIX+"-dataSource") || "")
 			loadFragment(t[0])
+			ac.trigger()
 			removeSpinner(currentTarget)
 			var target=targetEl.slice(1)
 			var d={}
@@ -352,6 +388,7 @@ $(document).ready(function(){
 			t.attr(PREFIX+"-dataSource",self.attr("action"))
 			t.attr(PREFIX+"-post",self.serialize())
 			loadFragment(t[0])
+			ac.trigger()
 			var target=targetEl.slice(1)
 			var d={}
 			d[target]=href
