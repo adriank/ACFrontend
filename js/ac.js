@@ -13,19 +13,32 @@ var PREFIX="ac",
 //D=true
 
 var ac={
-	"components":{}
+	"components":{},
+	"triggers":[]
 }
 
-var triggers=[]
 ac.onAvailable=function(selector,fn){
-	triggers.push({"selector":selector,"fn":fn})
+	ac.triggers.push({"selector":selector,"fn":fn})
 	$.onAvailable(selector,fn)
 }
 
 ac.trigger=function(){
-	$.each(triggers, function(el){
+	$.each(ac.triggers, function(el){
 		$.onAvailable(this.selector, this.fn)
 	})
+}
+
+ac.fixAPIURL=function(URL){
+	if (!URL.endsWith("/")) {
+		URL=URL+"/"
+	}
+	if (URL[0]!=="/") {
+		URL="/"+URL
+	}
+	if (!URL.startsWith("/api")) {
+		URL="/api"+URL
+	}
+	return URL
 }
 
 var replaceVars=function(s){
@@ -173,9 +186,6 @@ $(document).ready(function(){
 			$.ajax({
 				url:"/fragments/"+$(node).attr(PREFIX+"-fragment")+".html",
 				success:function(data){
-					if ($(node).attr(PREFIX+"-fragment")==="/IDE/API-files") {
-						D=true
-					}
 					if (D) console.log("START: AJAX success with data:",data)
 					node.innerHTML="<div class='hide'>"+data+"</div>"
 					if (D) console.log("NODE",node)
@@ -292,8 +302,14 @@ $(document).ready(function(){
 
 	//window.onhashchange=refreshState
 
-	$("body").on("click","a["+PREFIX+"-target]",function(e){
-D=true
+	$("body").on("click","a, button",function(e){
+		if ($(e.currentTarget).attr("href").startsWith("#")) {
+			e.preventDefault()
+			return
+		}
+		if (!$(e.currentTarget).attr(PREFIX+"-target")) {
+			return
+		}
 		e.preventDefault()
 		var currentTarget=$(e.currentTarget)
 				targetEl=currentTarget.attr(PREFIX+"-target"),
