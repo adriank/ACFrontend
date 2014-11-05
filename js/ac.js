@@ -29,15 +29,16 @@ ac.trigger=function(){
 }
 
 ac.fixAPIURL=function(URL){
-	if (!URL.endsWith("/")) {
+	if (URL.slice(-1)!=="/") {
 		URL=URL+"/"
 	}
 	if (URL[0]!=="/") {
 		URL="/"+URL
 	}
-	if (!URL.startsWith("/api")) {
+	if (URL.slice(0,4)!=="/api") {
 		URL="/api"+URL
 	}
+		console.log(URL)
 	return URL
 }
 
@@ -303,7 +304,9 @@ $(document).ready(function(){
 	//window.onhashchange=refreshState
 
 	$("body").on("click","a, button",function(e){
-		if ($(e.currentTarget).attr("href").startsWith("#")) {
+		var href=$(e.currentTarget).attr("href")
+		console.log(href)
+		if (href && href[0]==="#") {
 			e.preventDefault()
 			return
 		}
