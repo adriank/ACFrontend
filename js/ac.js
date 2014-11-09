@@ -5,7 +5,7 @@ var PREFIX="ac",
 		locale={},
 		lang=$("html").attr("lang") || "en",
 		appData={},
-		appDataOP=new objectPath(appData),
+		appDataOP=new ObjectPath(appData),
 		RE_PATH_Mustashes=/{{.+?}}/g // {{OPexpr},
 		RE_PATH_Mustashes_split=/{{.+?}}/g,
 		D=DEBUG=false
@@ -15,6 +15,16 @@ var PREFIX="ac",
 var ac={
 	"components":{},
 	"triggers":[]
+}
+
+ac.delMustashes=function(s){
+	if (!s) {
+		return s
+	}
+	if (s.slice(0,2)==="{{") {
+		return path.slice(2,-3)
+	}
+	return s
 }
 
 ac.onAvailable=function(selector,fn){
@@ -28,6 +38,19 @@ ac.trigger=function(){
 	})
 }
 
+ac.fixFragmentURL=function(URL){
+	if (URL.slice(-6,-1)!==".html") {
+		URL+=".html"
+	}
+	if (URL[0]!=="/") {
+		URL="/"+URL
+	}
+	if (URL.slice(0,10)!=="/fragments") {
+		URL="/fragments"+URL
+	}
+	return URL
+}
+
 ac.fixAPIURL=function(URL){
 	if (URL.slice(-1)!=="/") {
 		URL=URL+"/"
@@ -38,7 +61,6 @@ ac.fixAPIURL=function(URL){
 	if (URL.slice(0,4)!=="/api") {
 		URL="/api"+URL
 	}
-		console.log(URL)
 	return URL
 }
 
@@ -136,21 +158,17 @@ $(document).ready(function(){
 	var loadFragment=function(n,node){
 		node=node || n
 		if (D) console.log("START: each with node:",node)
-		var condition=$(node).attr(PREFIX+"-condition")
+		var condition=ac.delMustashes($(node).attr(PREFIX+"-condition"))
 		if (condition && !appDataOP.execute(condition)) {
 			console.log("condition ", condition," not satisfied")
 			return
 		}
-		var URL=$(node).attr(PREFIX+"-dataSource")
+		var URL=$(node).attr(PREFIX+"-dataSource"),
+				curr=false
 		if (URL) {
+			URL=ac.fixAPIURL(replaceVars(URL))
 			if (D) console.log("URL is:",URL)
-			if (URL[URL.length]==="/") {
-				URL=URL.slice(0,URL.length-1)
-			}
-			if (URL[0]!=="/") {
-				URL="/"+URL
-			}
-			var path=URL.replace(/\//g,".")
+			var path=URL.slice(4,URL.length-1).replace(/\//g,".")
 			if (path===".default") {
 				path=""
 			}
@@ -158,14 +176,13 @@ $(document).ready(function(){
 			// TODO bring back this optimization
 			if (true || !path || !appDataOP.execute("$"+path.replace(/\./g,"'.'").slice(1)+"'")) {
 				var conf={
-					url:"/api/"+URL+"/",
+					url:URL,
 					success:function(data){
 						if (!path) {
 							$.extend(appData,data,true)
 						}else{
 							set(appData,path.slice(1,path.length),data)
-							appDataOP.setContext(data)
-							appDataOP.setCurrent(data)
+							curr=data
 						}
 					},
 					error:function(){
@@ -185,17 +202,18 @@ $(document).ready(function(){
 
 		if ($(node).attr(PREFIX+"-fragment")) {
 			$.ajax({
-				url:"/fragments/"+$(node).attr(PREFIX+"-fragment")+".html",
+				url:ac.fixFragmentURL(replaceVars($(node).attr(PREFIX+"-fragment"))),
 				success:function(data){
+					appDataOP.setContext(curr)
+					appDataOP.setCurrent(curr)
 					if (D) console.log("START: AJAX success with data:",data)
 					node.innerHTML="<div class='hide'>"+data+"</div>"
 					if (D) console.log("NODE",node)
 					loadFragments(node)
 					var dp=$(":not(*["+PREFIX+"-datapath]) *["+PREFIX+"-datapath]",node)
-					if (D) console.log("DS!",dp)
 					// This is slow - a proff of concept only!
 					if(dp.length){
-						if (D) console.log("dataPath found!")
+						if (D) console.log("dataPath found!",dp)
 						dp.each(template)
 						dp.removeAttr(PREFIX+"-datapath")
 					}
@@ -204,11 +222,11 @@ $(document).ready(function(){
 					nodesWithConditions.each(function(e){
 						if (!appDataOP.execute($(this).attr(PREFIX+"-condition"))) {
 							//console.log("DATA",appDataOP.current)
-							if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"not satisfied")
+							if (D) console.log("condition",ac.delMustashes($(this).attr(PREFIX+"-condition")),"not satisfied")
 							//console.log(!appDataOP.execute($(this).attr(PREFIX+"-condition")))
 							$(this).remove()
 						}else{
-							if (D) console.log("condition",$(this).attr(PREFIX+"-condition"),"satisfied")
+							if (D) console.log("condition",ac.delMustashes($(this).attr(PREFIX+"-condition")),"satisfied")
 						}
 					})
 					if (D) console.log("END: AJAX success")
@@ -233,7 +251,7 @@ $(document).ready(function(){
 
 	var template=function(n,node){
 		if (D) console.log("START: template with node:",node)
-		var root=appDataOP.execute($(node).attr(PREFIX+"-datapath")),
+		var root=appDataOP.execute(ac.delMustashes($(node).attr(PREFIX+"-datapath"))),
 			temp=node.innerHTML.replace(/ ac-datapath=".*"/,""),
 			result=[]
 		var cache=appDataOP.current
@@ -246,7 +264,7 @@ $(document).ready(function(){
 			var nodesWithConditions=node.find("*["+PREFIX+"-condition]")
 			if (D) console.log("nodesWithConditions", node)
 			nodesWithConditions.each(function(e){
-				var con=$(this).attr(PREFIX+"-condition")
+				var con=ac.delMustashes($(this).attr(PREFIX+"-condition"))
 				if (!appDataOP.execute(con)) {
 					if (D) console.log("condition",con,"not satisfied")
 					$(this).remove()
@@ -261,13 +279,9 @@ $(document).ready(function(){
 			//console.log("REP ",replaceVars(temp))
 		})
 		appDataOP.setCurrent(cache)
-		//appDataOP.resetCurrent()
 		node.innerHTML=result.join("")
-		//var ds=$("*["+PREFIX+"-datapath]",node)
-		//ds.each(template)
 		if (D) console.log("END: template", result.join(""))
 	}
-
 
 	var x=$.ajax({
 		url:"/locale/"+$("html").attr("lang")+".json",
@@ -305,7 +319,6 @@ $(document).ready(function(){
 
 	$("body").on("click","a, button",function(e){
 		var href=$(e.currentTarget).attr("href")
-		console.log(href)
 		if (href && href[0]==="#") {
 			e.preventDefault()
 			return
@@ -315,14 +328,15 @@ $(document).ready(function(){
 		}
 		e.preventDefault()
 		var currentTarget=$(e.currentTarget)
-				targetEl=currentTarget.attr(PREFIX+"-target"),
+				targetSelector=currentTarget.attr(PREFIX+"-target"),
 				href=currentTarget.attr("href"),
-				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
-				condition=currentTarget.attr(PREFIX+"-condition")
+				currFragment=$(targetSelector).attr(PREFIX+"-fragment"),
+				condition=ac.delMustashes(currentTarget.attr(PREFIX+"-condition"))
 
-		currentTarget.parents(".nav").find("*[ac-target="+targetEl+"].active").removeClass("active")
+		currentTarget.parents(".nav").find("*[ac-target="+targetSelector+"].active").removeClass("active")
 		currentTarget.addClass("active")
 		addSpinner(currentTarget)
+
 		if (condition && !appDataOP.execute(condition)) {
 			if (D) console.log("condition "+condition+" not satisfied")
 			return
@@ -334,10 +348,10 @@ $(document).ready(function(){
 		if (D) console.log("href is",href)
 		// TODO bring back this optimization
 		if (true || currFragment!==href) {
-			if (D) console.log("currFragment",targetEl)
-			var t=$(targetEl)
+			if (D) console.log("currFragment",targetSelector)
+			var t=$(targetSelector)
 			if (!t[0]) {
-				console.error("Target element "+targetEl+" not found!")
+				console.error("Target element "+targetSelector+" not found!")
 				return
 			}
 			t.attr(PREFIX+"-fragment",href)
@@ -345,13 +359,13 @@ $(document).ready(function(){
 			loadFragment(t[0])
 			ac.trigger()
 			removeSpinner(currentTarget)
-			var target=targetEl.slice(1)
+			var target=targetSelector.slice(1)
 			var d={}
 			d[target]=href
 			d[target+"_ds"]=t.attr(PREFIX+"-dataSource")
 			locationHash.update(d)
 		}
-		if (D) console.log(e.currentTarget,targetEl,href)
+		if (D) console.log(e.currentTarget,targetSelector,href)
 	})
 
 
@@ -367,7 +381,7 @@ $(document).ready(function(){
 		var targetEl=self.attr(PREFIX+"-target"),
 				href=self.attr("href"),
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
-				condition=self.attr(PREFIX+"-condition")
+				condition=ac.delMustashes(self.attr(PREFIX+"-condition"))
 
 		if (!targetEl) {
 			var btn=$(e.originalEvent.explicitOriginalTarget)
