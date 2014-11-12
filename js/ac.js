@@ -65,7 +65,7 @@ ac.fixAPIURL=function(URL){
 }
 
 var replaceVars=function(s){
-	//console.log("START: replaceVars within string:",s)
+	if (D) console.log("START: replaceVars within string:",s)
 	s=s.replace(/<!--[\s\S]*?-->/g, "")
 	var variables=s.match(RE_PATH_Mustashes)
 	if (!variables) {
@@ -160,11 +160,12 @@ $(document).ready(function(){
 		if (D) console.log("START: each with node:",node)
 		var condition=ac.delMustashes($(node).attr(PREFIX+"-condition"))
 		if (condition && !appDataOP.execute(condition)) {
-			console.log("condition ", condition," not satisfied")
+			if (D) console.warn("condition ", condition," not satisfied")
 			return
 		}
 		var URL=$(node).attr(PREFIX+"-dataSource"),
-				curr=false
+				curr=false,
+				ret=true
 		if (URL) {
 			URL=ac.fixAPIURL(replaceVars(URL))
 			if (D) console.log("URL is:",URL)
@@ -185,8 +186,13 @@ $(document).ready(function(){
 							curr=data
 						}
 					},
-					error:function(){
-						console.error("API call to "+URL+" was not successful!")
+					error:function(e){
+						console.log(e)
+						ret={
+							"@status":"error",
+							"@message":"API call was set up but was unsuccessful: "
+						}
+						//console.error("API call to "+URL+" was not successful!")
 					},
 					dataType:"json",
 					async:false
@@ -200,9 +206,11 @@ $(document).ready(function(){
 			}
 		}
 
-		if ($(node).attr(PREFIX+"-fragment")) {
+		var fragmentURL=$(node).attr(PREFIX+"-fragment")
+
+		if (fragmentURL!==undefined) {
 			$.ajax({
-				url:ac.fixFragmentURL(replaceVars($(node).attr(PREFIX+"-fragment"))),
+				url:ac.fixFragmentURL(replaceVars(fragmentURL)),
 				success:function(data){
 					appDataOP.setContext(curr)
 					appDataOP.setCurrent(curr)
@@ -211,7 +219,7 @@ $(document).ready(function(){
 					if (D) console.log("NODE",node)
 					loadFragments(node)
 					var dp=$(":not(*["+PREFIX+"-datapath]) *["+PREFIX+"-datapath]",node)
-					// This is slow - a proff of concept only!
+					// This is slow
 					if(dp.length){
 						if (D) console.log("dataPath found!",dp)
 						dp.each(template)
@@ -231,14 +239,19 @@ $(document).ready(function(){
 					})
 					if (D) console.log("END: AJAX success")
 				},
-				error:function(){
-					if (D) console.error("Fragment file at /fragments/"+$("html").attr("lang")+"not found!")
+				error:function(e){
+					ret={
+						"@status":"error",
+						"@message":"Fragment file at /fragments/"+fragmentURL+" not found!"
+					}
+					if (D) console.error("Fragment file at /fragments/"+fragmentURL+" not found!")
 				},
 				async:false,
 				dataType:"html"
 			})
 		}
-		if (D) console.log("END: each")
+		if (D) console.log("END: loadFragment with",ret)
+		return ret
 	}
 
 	var loadFragments=function(context){
@@ -258,7 +271,8 @@ $(document).ready(function(){
 		$(root).each(function(n,o){
 			appDataOP.setCurrent(o)
 			//console.log("DATA", o)
-			$("body").append("<span id='ac-helper' class='hide'></span>")
+			// tbody here is a hack - innerHTML deletes table tags when outside tbody
+			$("body").append("<tbody id='ac-helper' class='hide'></tbody>")
 			var node=$("#ac-helper")
 			node[0].innerHTML=replaceVars(temp)
 			var nodesWithConditions=node.find("*["+PREFIX+"-condition]")
@@ -273,10 +287,8 @@ $(document).ready(function(){
 					if (D) console.log("condition",con,"satisfied")
 				}
 			})
-			//console.log(node[0].innerHTML)
 			result.push(node[0].innerHTML)
 			node.remove()
-			//console.log("REP ",replaceVars(temp))
 		})
 		appDataOP.setCurrent(cache)
 		node.innerHTML=result.join("")
@@ -297,8 +309,6 @@ $(document).ready(function(){
 	})
 
 	loadFragments(document)
-
-	//if (D) console.log("hash state", state)
 
 	var refreshState=function(){
 		var state=locationHash.params
@@ -356,18 +366,24 @@ $(document).ready(function(){
 			}
 			t.attr(PREFIX+"-fragment",href)
 			t.attr(PREFIX+"-dataSource",currentTarget.attr(PREFIX+"-dataSource") || "")
-			loadFragment(t[0])
+			var lf=loadFragment(t[0])
+			if (lf!==true) {
+				errorSpinner(currentTarget,"ERROR: "+lf["@message"])
+				return
+			}
 			ac.trigger()
+			console.log(lf)
 			removeSpinner(currentTarget)
 			var target=targetSelector.slice(1)
-			var d={}
-			d[target]=href
-			d[target+"_ds"]=t.attr(PREFIX+"-dataSource")
+			var d={"target":href}
+			var ds=t.attr(PREFIX+"-dataSource")
+			if (ds) {
+				d[target+"_ds"]=ds
+			}
 			locationHash.update(d)
 		}
 		if (D) console.log(e.currentTarget,targetSelector,href)
 	})
-
 
 	// TODO, optimization: check if $("body").on("submit","form",...) works
 	$.onAvailable("form", function(){
@@ -383,9 +399,10 @@ $(document).ready(function(){
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
 				condition=ac.delMustashes(self.attr(PREFIX+"-condition"))
 
+		var btn=$(e.originalEvent.explicitOriginalTarget)
+		addSpinner(btn)
+
 		if (!targetEl) {
-			var btn=$(e.originalEvent.explicitOriginalTarget)
-			addSpinner(btn)
 			$.ajax({
 				url: "/api"+self.attr("action"),
 				data: self.serialize(),
@@ -427,15 +444,34 @@ $(document).ready(function(){
 				return
 			}
 			t.attr(PREFIX+"-fragment",href)
-			t.attr(PREFIX+"-dataSource",self.attr("action"))
-			t.attr(PREFIX+"-post",self.serialize())
-			loadFragment(t[0])
-			ac.trigger()
-			var target=targetEl.slice(1)
-			var d={}
-			d[target]=href
-			d[target+"_ds"]=self.attr("action")
-			locationHash.update(d)
+			t.attr(PREFIX+"-dataSource",self.attr(PREFIX+"-dataSource"))
+			$.ajax({
+				url: "/api"+self.attr("action"),
+				data: self.serialize(),
+				success: function(e) {
+					removeSpinner(btn)
+					var r=self.attr(PREFIX+"-redirect")
+					if (r) {
+						window.location=r
+						return
+					}
+					loadFragment(t[0])
+					ac.trigger()
+					var target=targetEl.slice(1)
+					var d={}
+					d[target]=href
+					d[target+"_ds"]=self.attr(PREFIX+"-dataSource")
+					locationHash.update(d)
+				},
+				error:function(e, status, error){
+					try{
+						errorSpinner(btn, e.responseJSON.GlobalError.message)
+					}catch(TypeError){
+						errorSpinner(btn, error || "Server not responding.")
+					}
+				},
+				type:"POST"
+			})
 		}
 	})
 })
