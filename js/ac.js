@@ -93,6 +93,7 @@ var replaceVars=function(s){
 var hashWorker=function(){
 	this.params={}
 	this.get()
+	this.hashChangeSource=null
 }
 
 hashWorker.prototype={
@@ -267,18 +268,27 @@ $(document).ready(function(){
 
 	var template=function(n,node){
 		if (D) console.log("START: template with node:",node)
-		var root=appDataOP.execute(ac.rmMustashes($(node).attr(PREFIX+"-datapath"))),
+		var dataRoot=appDataOP.execute(ac.rmMustashes($(node).attr(PREFIX+"-datapath"))),
 				temp=node.innerHTML.replace(/ ac-datapath=".*"/,""),
 				cache=appDataOP.current
 
-		$(node).children().remove()
+		node.innerHTML=""
 
-		$(root).each(function(n,o){
+		$(dataRoot).each(function(n,o){
 			appDataOP.setCurrent(o)
 			var innerNode=$($.parseHTML(replaceVars(temp)))
-			var nodesWithConditions=innerNode.find("*["+PREFIX+"-condition]")
-			if (D) console.log("nodesWithConditions", innerNode)
-			nodesWithConditions.each(function(e){
+			var nodesWithConditions=[]
+			$.each(innerNode,function(){
+				if (this.nodeType===3) {
+					return
+				}
+				if ($(this).attr(PREFIX+"-condition")) {
+					nodesWithConditions.push(this)
+				}
+				nodesWithConditions.push.apply($.find("*["+PREFIX+"-condition]"))
+			})
+			if (D) console.log("nodesWithConditions", nodesWithConditions)
+			$(nodesWithConditions).each(function(e){
 				var con=ac.rmMustashes($(this).attr(PREFIX+"-condition"))
 				if (!appDataOP.execute(con)) {
 					$(this).remove()
@@ -314,7 +324,6 @@ $(document).ready(function(){
 		if ($.isEmptyObject(state)) {
 			loadFragment($("body>div")[0])
 		}
-		console.log("STATE",state)
 		$.each(state, function(k,o){
 			if (k.indexOf("_ds")!==-1) {
 				return
@@ -325,12 +334,17 @@ $(document).ready(function(){
 		})
 	}
 
-	//var r=locationHash.
-	//refreshState()
-
-	window.onhashchange=refreshState
+	window.onhashchange=function(){
+		if (!locationHash.hashChangeSource) {
+			refreshState()
+			ac.trigger()
+		}
+		locationHash.hashChangeSource=null
+	}
+	window.onload=refreshState
 
 	$("body").on("click","a, button",function(e){
+		locationHash.hashChangeSource="internal"
 		var href=$(e.currentTarget).attr("href")
 		if (href && href[0]==="#") {
 			e.preventDefault()
@@ -395,6 +409,7 @@ $(document).ready(function(){
 	})
 
 	$("body").on("submit", "form", function(e){
+		locationHash.hashChangeSource="internal"
 		e.preventDefault()
 		var self=$(this)
 		var targetEl=self.attr(PREFIX+"-target"),
