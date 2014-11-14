@@ -14,10 +14,11 @@ var PREFIX="ac",
 
 var ac={
 	"components":{},
-	"triggers":[]
+	"triggers":[],
+	"defaultTemplates":{}
 }
 
-ac.delMustashes=function(s){
+ac.rmMustashes=function(s){
 	if (!s) {
 		return s
 	}
@@ -158,7 +159,9 @@ $(document).ready(function(){
 	var loadFragment=function(n,node){
 		node=node || n
 		if (D) console.log("START: each with node:",node)
-		var condition=ac.delMustashes($(node).attr(PREFIX+"-condition"))
+		//console.log(node)
+		//ac.defaultTemplates[node.id]=node.innerHTML
+		var condition=ac.rmMustashes($(node).attr(PREFIX+"-condition"))
 		if (condition && !appDataOP.execute(condition)) {
 			if (D) console.warn("condition ", condition," not satisfied")
 			return
@@ -230,11 +233,11 @@ $(document).ready(function(){
 					nodesWithConditions.each(function(e){
 						if (!appDataOP.execute($(this).attr(PREFIX+"-condition"))) {
 							//console.log("DATA",appDataOP.current)
-							if (D) console.log("condition",ac.delMustashes($(this).attr(PREFIX+"-condition")),"not satisfied")
+							if (D) console.log("condition",ac.rmMustashes($(this).attr(PREFIX+"-condition")),"not satisfied")
 							//console.log(!appDataOP.execute($(this).attr(PREFIX+"-condition")))
 							$(this).remove()
 						}else{
-							if (D) console.log("condition",ac.delMustashes($(this).attr(PREFIX+"-condition")),"satisfied")
+							if (D) console.log("condition",ac.rmMustashes($(this).attr(PREFIX+"-condition")),"satisfied")
 						}
 					})
 					if (D) console.log("END: AJAX success")
@@ -264,35 +267,31 @@ $(document).ready(function(){
 
 	var template=function(n,node){
 		if (D) console.log("START: template with node:",node)
-		var root=appDataOP.execute(ac.delMustashes($(node).attr(PREFIX+"-datapath"))),
-			temp=node.innerHTML.replace(/ ac-datapath=".*"/,""),
-			result=[]
-		var cache=appDataOP.current
+		var root=appDataOP.execute(ac.rmMustashes($(node).attr(PREFIX+"-datapath"))),
+				temp=node.innerHTML.replace(/ ac-datapath=".*"/,""),
+				cache=appDataOP.current
+
+		$(node).children().remove()
+
 		$(root).each(function(n,o){
 			appDataOP.setCurrent(o)
-			//console.log("DATA", o)
-			// tbody here is a hack - innerHTML deletes table tags when outside tbody
-			$("body").append("<tbody id='ac-helper' class='hide'></tbody>")
-			var node=$("#ac-helper")
-			node[0].innerHTML=replaceVars(temp)
-			var nodesWithConditions=node.find("*["+PREFIX+"-condition]")
-			if (D) console.log("nodesWithConditions", node)
+			var innerNode=$($.parseHTML(replaceVars(temp)))
+			var nodesWithConditions=innerNode.find("*["+PREFIX+"-condition]")
+			if (D) console.log("nodesWithConditions", innerNode)
 			nodesWithConditions.each(function(e){
-				var con=ac.delMustashes($(this).attr(PREFIX+"-condition"))
+				var con=ac.rmMustashes($(this).attr(PREFIX+"-condition"))
 				if (!appDataOP.execute(con)) {
-					if (D) console.log("condition",con,"not satisfied")
 					$(this).remove()
+					if (D) console.log("condition",con,"not satisfied")
 				}else{
 					$(this).removeAttr(PREFIX+"-condition")
 					if (D) console.log("condition",con,"satisfied")
 				}
 			})
-			result.push(node[0].innerHTML)
-			node.remove()
+			$(node).append(innerNode)
 		})
 		appDataOP.setCurrent(cache)
-		node.innerHTML=result.join("")
-		if (D) console.log("END: template", result.join(""))
+		if (D) console.log("END: template")
 	}
 
 	var x=$.ajax({
@@ -311,7 +310,11 @@ $(document).ready(function(){
 	loadFragments(document)
 
 	var refreshState=function(){
-		var state=locationHash.params
+		var state=locationHash.get()
+		if ($.isEmptyObject(state)) {
+			loadFragment($("body>div")[0])
+		}
+		console.log("STATE",state)
 		$.each(state, function(k,o){
 			if (k.indexOf("_ds")!==-1) {
 				return
@@ -323,9 +326,9 @@ $(document).ready(function(){
 	}
 
 	//var r=locationHash.
-	refreshState()
+	//refreshState()
 
-	//window.onhashchange=refreshState
+	window.onhashchange=refreshState
 
 	$("body").on("click","a, button",function(e){
 		var href=$(e.currentTarget).attr("href")
@@ -341,7 +344,7 @@ $(document).ready(function(){
 				targetSelector=currentTarget.attr(PREFIX+"-target"),
 				href=currentTarget.attr("href"),
 				currFragment=$(targetSelector).attr(PREFIX+"-fragment"),
-				condition=ac.delMustashes(currentTarget.attr(PREFIX+"-condition"))
+				condition=ac.rmMustashes(currentTarget.attr(PREFIX+"-condition"))
 
 		currentTarget.parents(".nav").find("*[ac-target="+targetSelector+"].active").removeClass("active")
 		currentTarget.addClass("active")
@@ -372,10 +375,10 @@ $(document).ready(function(){
 				return
 			}
 			ac.trigger()
-			console.log(lf)
 			removeSpinner(currentTarget)
 			var target=targetSelector.slice(1)
-			var d={"target":href}
+			var d={}
+			d[target]=href
 			var ds=t.attr(PREFIX+"-dataSource")
 			if (ds) {
 				d[target+"_ds"]=ds
@@ -397,7 +400,7 @@ $(document).ready(function(){
 		var targetEl=self.attr(PREFIX+"-target"),
 				href=self.attr("href"),
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
-				condition=ac.delMustashes(self.attr(PREFIX+"-condition"))
+				condition=ac.rmMustashes(self.attr(PREFIX+"-condition"))
 
 		var btn=$(e.originalEvent.explicitOriginalTarget)
 		addSpinner(btn)
