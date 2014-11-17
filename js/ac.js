@@ -1,5 +1,6 @@
 // onAvailable from https://github.com/furf/jquery-onavailable
-(function(A){A.extend({onAvailable:function(C,F){if(typeof F!=="function"){throw new TypeError();}var E=A.onAvailable;if(!(C instanceof Array)){C=[C];}for(var B=0,D=C.length;B<D;++B){E.listeners.push({id:C[B],callback:F,obj:arguments[2],override:arguments[3],checkContent:!!arguments[4]});}if(!E.interval){E.interval=window.setInterval(E.checkAvailable,E.POLL_INTERVAL);}return this;},onContentReady:function(C,E,D,B){A.onAvailable(C,E,D,B,true);}});A.extend(A.onAvailable,{POLL_RETRIES:2000,POLL_INTERVAL:20,interval:null,listeners:[],executeCallback:function(C,D){var B=C;if(D.override){if(D.override===true){B=D.obj;}else{B=D.override;}}D.callback.call(B,D.obj);},checkAvailable:function(){var F=A.onAvailable;var D=F.listeners;for(var B=0;B<D.length;++B){var E=D[B];var C=$(E.id);if(C[0]&&(!E.checkContent||(E.checkContent&&(C.nextSibling||C.parentNode.nextSibling||A.isReady)))){F.executeCallback(C,E);D.splice(B,1);--B;}if(D.length===0||--F.POLL_RETRIES===0){F.interval=window.clearInterval(F.interval);}}}});})(jQuery);
+(function(A){A.extend({onAvailable:function(C,F){if(typeof F!=="function"){throw new TypeError();}var E=A.onAvailable;if(!(C instanceof Array)){C=[C];}for(var B=0,D=C.length;B<D;++B){E.listeners.push({id:C[B],callback:F,obj:arguments[2],override:arguments[3],checkContent:!!arguments[4]});}if(!E.interval){E.interval=window.setInterval(E.checkAvailable,E.POLL_INTERVAL);}return this;},onContentReady:function(C,E,D,B){A.onAvailable(C,E,D,B,true);}});A.extend(A.onAvailable,{POLL_RETRIES:2000,POLL_INTERVAL:20,interval:null,listeners:[],executeCallback:function(C,D){var B=C;if(D.override){if(D.override===true){B=D.obj;}else{B=D.override;}}D.callback.call(B,D.obj);},checkAvailable:function(){var F=A.onAvailable;var D=F.listeners;for(var B=0;B<D.length;++B){var E=D[B];var C=$(E.id);if(C[0]&&(!E.checkContent||(E.checkContent&&(C.nextSibling||C.parentNode.nextSibling||A.isReady)))){F.executeCallback(C,E);D.splice(B,1);--B;}if(D.length===0||--F.POLL_RETRIES===0){F.interval=window.clearInterval(F.interval);}}}});})(
+jQuery);
 
 var PREFIX="ac",
 		locale={},
@@ -9,8 +10,6 @@ var PREFIX="ac",
 		RE_PATH_Mustashes=/{{.+?}}/g // {{OPexpr},
 		RE_PATH_Mustashes_split=/{{.+?}}/g,
 		D=DEBUG=false
-
-//D=true
 
 var ac={
 	"components":{},
@@ -93,7 +92,7 @@ var replaceVars=function(s){
 var hashWorker=function(){
 	this.params={}
 	this.get()
-	this.hashChangeSource=null
+	this.hashChangeSource="window"
 }
 
 hashWorker.prototype={
@@ -186,7 +185,7 @@ $(document).ready(function(){
 						if (!path) {
 							$.extend(appData,data,true)
 						}else{
-							set(appData,path.slice(1,path.length),data)
+							set(appData,path.slice(1),data)
 							curr=data
 						}
 					},
@@ -317,8 +316,6 @@ $(document).ready(function(){
 		async:false
 	})
 
-	loadFragments(document)
-
 	var refreshState=function(){
 		var state=locationHash.get()
 		if ($.isEmptyObject(state)) {
@@ -333,6 +330,8 @@ $(document).ready(function(){
 			loadFragment($("#"+k)[0])
 		})
 	}
+
+	loadFragments(document)
 
 	window.onhashchange=function(){
 		if (!locationHash.hashChangeSource) {
@@ -425,6 +424,17 @@ $(document).ready(function(){
 				url: "/api"+self.attr("action"),
 				data: self.serialize(),
 				success: function(e) {
+					var error=false
+					for(var key in e){
+						if (e[key]["@status"]==="error") {
+							error=e[key]["@message"] || e[key]["@error"]
+							break
+						}
+					}
+					if (error) {
+						errorSpinner(btn,error)
+						return
+					}
 					removeSpinner(btn)
 					var r=self.attr(PREFIX+"-redirect")
 					if (r) {
@@ -432,7 +442,6 @@ $(document).ready(function(){
 					}
 				},
 				error:function(e, status, error){
-					console.log(error)
 					try{
 						errorSpinner(btn, e.responseJSON.GlobalError.message)
 					}catch(TypeError){
