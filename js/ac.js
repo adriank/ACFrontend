@@ -1,6 +1,5 @@
 // onAvailable from https://github.com/furf/jquery-onavailable
-(function(A){A.extend({onAvailable:function(C,F){if(typeof F!=="function"){throw new TypeError();}var E=A.onAvailable;if(!(C instanceof Array)){C=[C];}for(var B=0,D=C.length;B<D;++B){E.listeners.push({id:C[B],callback:F,obj:arguments[2],override:arguments[3],checkContent:!!arguments[4]});}if(!E.interval){E.interval=window.setInterval(E.checkAvailable,E.POLL_INTERVAL);}return this;},onContentReady:function(C,E,D,B){A.onAvailable(C,E,D,B,true);}});A.extend(A.onAvailable,{POLL_RETRIES:2000,POLL_INTERVAL:20,interval:null,listeners:[],executeCallback:function(C,D){var B=C;if(D.override){if(D.override===true){B=D.obj;}else{B=D.override;}}D.callback.call(B,D.obj);},checkAvailable:function(){var F=A.onAvailable;var D=F.listeners;for(var B=0;B<D.length;++B){var E=D[B];var C=$(E.id);if(C[0]&&(!E.checkContent||(E.checkContent&&(C.nextSibling||C.parentNode.nextSibling||A.isReady)))){F.executeCallback(C,E);D.splice(B,1);--B;}if(D.length===0||--F.POLL_RETRIES===0){F.interval=window.clearInterval(F.interval);}}}});})(
-jQuery);
+(function(A){A.extend({onAvailable:function(C,F){if(typeof F!=="function"){throw new TypeError();}var E=A.onAvailable;if(!(C instanceof Array)){C=[C];}for(var B=0,D=C.length;B<D;++B){E.listeners.push({id:C[B],callback:F,obj:arguments[2],override:arguments[3],checkContent:!!arguments[4]});}if(!E.interval){E.interval=window.setInterval(E.checkAvailable,E.POLL_INTERVAL);}return this;},onContentReady:function(C,E,D,B){A.onAvailable(C,E,D,B,true);}});A.extend(A.onAvailable,{POLL_RETRIES:2000,POLL_INTERVAL:20,interval:null,listeners:[],executeCallback:function(C,D){var B=C;if(D.override){if(D.override===true){B=D.obj;}else{B=D.override;}}D.callback.call(B,D.obj);},checkAvailable:function(){var F=A.onAvailable;var D=F.listeners;for(var B=0;B<D.length;++B){var E=D[B];var C=$(E.id);if(C[0]&&(!E.checkContent||(E.checkContent&&(C.nextSibling||C.parentNode.nextSibling||A.isReady)))){F.executeCallback(C,E);D.splice(B,1);--B;}if(D.length===0||--F.POLL_RETRIES===0){F.interval=window.clearInterval(F.interval);}}}});})(jQuery);
 
 var PREFIX="ac",
 		locale={},
@@ -190,12 +189,12 @@ $(document).ready(function(){
 						}
 					},
 					error:function(e){
-						console.log(e)
 						ret={
 							"@status":"error",
-							"@message":"API call was set up but was unsuccessful: "
+							"@error":"BackendNotResponding",
+							"@message":"API call to "+URL+" was not successful!"
 						}
-						//console.error("API call to "+URL+" was not successful!")
+						if (D) console.error("API call to "+URL+" was not successful!")
 					},
 					dataType:"json",
 					async:false
@@ -240,6 +239,7 @@ $(document).ready(function(){
 							if (D) console.log("condition",ac.rmMustashes($(this).attr(PREFIX+"-condition")),"satisfied")
 						}
 					})
+					ac.trigger()
 					if (D) console.log("END: AJAX success")
 				},
 				error:function(e){
@@ -340,6 +340,7 @@ $(document).ready(function(){
 		}
 		locationHash.hashChangeSource=null
 	}
+
 	window.onload=refreshState
 
 	$("body").on("click","a, button",function(e){
@@ -421,13 +422,15 @@ $(document).ready(function(){
 
 		if (!targetEl) {
 			$.ajax({
-				url: "/api"+self.attr("action"),
+				url: ac.fixAPIURL(self.attr("action")),
 				data: self.serialize(),
 				success: function(e) {
 					var error=false
 					for(var key in e){
 						if (e[key]["@status"]==="error") {
 							error=e[key]["@message"] || e[key]["@error"]
+							var errorDiv=btn.parents("form").find(".ac-error."+e[key]["@error"])
+							if (errorDiv) errorDiv.addClass("show")
 							break
 						}
 					}
@@ -473,9 +476,22 @@ $(document).ready(function(){
 			t.attr(PREFIX+"-fragment",href)
 			t.attr(PREFIX+"-dataSource",self.attr(PREFIX+"-dataSource"))
 			$.ajax({
-				url: "/api"+self.attr("action"),
+				url: ac.fixAPIURL(self.attr("action")),
 				data: self.serialize(),
 				success: function(e) {
+					var error=false
+					for(var key in e){
+						if (e[key]["@status"]==="error") {
+							error=e[key]["@message"] || e[key]["@error"]
+							var errorDiv=btn.parents("form").find(".ac-error."+e[key]["@error"])
+							if (errorDiv) errorDiv.addClass("show")
+							break
+						}
+					}
+					if (error) {
+						errorSpinner(btn,error)
+						return
+					}
 					removeSpinner(btn)
 					var r=self.attr(PREFIX+"-redirect")
 					if (r) {
