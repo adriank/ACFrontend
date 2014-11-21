@@ -92,6 +92,7 @@ var hashWorker=function(){
 	this.params={}
 	this.get()
 	this.hashChangeSource="window"
+	this.currentHash=window.location.hash.substring(2)
 }
 
 hashWorker.prototype={
@@ -102,6 +103,7 @@ hashWorker.prototype={
 				r = /([^&;=]+)=?([^&;]*)/g,
 				d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
 				q = window.location.hash.substring(2);
+		this.currentHash=q
 
 		while (e = r.exec(q))
 			hashParams[d(e[1])] = d(e[2]);
@@ -317,6 +319,11 @@ $(document).ready(function(){
 	})
 
 	var refreshState=function(){
+	  var event = jQuery.Event("beforehashchange");
+	  $(document).trigger(event)
+	  if (event.isDefaultPrevented()){
+	    return
+	  }
 		var state=locationHash.get()
 		if ($.isEmptyObject(state)) {
 			loadFragment($("body>div")[0])
@@ -354,6 +361,11 @@ $(document).ready(function(){
 			return
 		}
 		e.preventDefault()
+	  var event = jQuery.Event("beforehashchange");
+	  $(document).trigger(event)
+	  if (event.isDefaultPrevented()){
+	    return
+	  }
 		var currentTarget=$(e.currentTarget)
 				targetSelector=currentTarget.attr(PREFIX+"-target"),
 				href=currentTarget.attr("href"),
@@ -409,8 +421,13 @@ $(document).ready(function(){
 	})
 
 	$("body").on("submit", "form", function(e){
-		locationHash.hashChangeSource="internal"
 		e.preventDefault()
+	  var event = jQuery.Event("beforehashchange");
+	  $(document).trigger(event)
+	  if (event.isDefaultPrevented()){
+	    return
+	  }
+		locationHash.hashChangeSource="internal"
 		var self=$(this)
 		var targetEl=self.attr(PREFIX+"-target"),
 				href=self.attr("href"),
