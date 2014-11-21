@@ -34,6 +34,9 @@
 .ph12{padding-left:12px;padding-right:12px;}
 .ph16{padding-left:16px;padding-right:16px;}
 .ph32{padding-left:32px;padding-right:32px;}
+.ac-error{
+	display:none;
+}
 .hide-delay{
 	transition: opacity 1.5s;
 	opacity: 0;
