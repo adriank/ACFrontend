@@ -216,8 +216,10 @@ $(document).ready(function(){
 			$.ajax({
 				url:ac.fixFragmentURL(replaceVars(fragmentURL)),
 				success:function(data){
-					appDataOP.setContext(curr)
-					appDataOP.setCurrent(curr)
+				  if (curr){
+  					appDataOP.setContext(curr)
+  					appDataOP.setCurrent(curr)
+				  }
 					if (D) console.log("START: AJAX success with data:",data)
 					node.innerHTML="<div class='hide'>"+data+"</div>"
 					if (D) console.log("NODE",node)
@@ -230,15 +232,15 @@ $(document).ready(function(){
 						dp.removeAttr(PREFIX+"-datapath")
 					}
 					node.innerHTML=replaceVars($(node).children().html())
-					var nodesWithConditions=$("*["+PREFIX+"-condition]",node)
+					var nodesWithConditions=$("*["+PREFIX+"-showWhen]",node)
 					nodesWithConditions.each(function(e){
-						if (!appDataOP.execute($(this).attr(PREFIX+"-condition"))) {
+						if (!appDataOP.execute($(this).attr(PREFIX+"-showWhen"))) {
 							//console.log("DATA",appDataOP.current)
-							if (D) console.log("condition",ac.rmMustashes($(this).attr(PREFIX+"-condition")),"not satisfied")
+							if (D) console.log("showWhen",ac.rmMustashes($(this).attr(PREFIX+"-showWhen")),"not satisfied")
 							//console.log(!appDataOP.execute($(this).attr(PREFIX+"-condition")))
 							$(this).remove()
 						}else{
-							if (D) console.log("condition",ac.rmMustashes($(this).attr(PREFIX+"-condition")),"satisfied")
+							if (D) console.log("showWhen",ac.rmMustashes($(this).attr(PREFIX+"-showWhen")),"satisfied")
 						}
 					})
 					ac.trigger()
@@ -283,20 +285,20 @@ $(document).ready(function(){
 				if (this.nodeType===3) {
 					return
 				}
-				if ($(this).attr(PREFIX+"-condition")) {
+				if ($(this).attr(PREFIX+"-showWhen")) {
 					nodesWithConditions.push(this)
 				}
-				nodesWithConditions.push.apply($.find("*["+PREFIX+"-condition]"))
+				nodesWithConditions.push.apply($.find("*["+PREFIX+"-showWhen]"))
 			})
 			if (D) console.log("nodesWithConditions", nodesWithConditions)
 			$(nodesWithConditions).each(function(e){
-				var con=ac.rmMustashes($(this).attr(PREFIX+"-condition"))
+				var con=ac.rmMustashes($(this).attr(PREFIX+"-showWhen"))
 				if (!appDataOP.execute(con)) {
 					$(this).remove()
-					if (D) console.log("condition",con,"not satisfied")
+					if (D) console.log("showWhen",con,"not satisfied")
 				}else{
-					$(this).removeAttr(PREFIX+"-condition")
-					if (D) console.log("condition",con,"satisfied")
+					$(this).removeAttr(PREFIX+"-showWhen")
+					if (D) console.log("showWhen",con,"satisfied")
 				}
 			})
 			$(node).append(innerNode)
@@ -428,13 +430,15 @@ $(document).ready(function(){
 	    return
 	  }
 		locationHash.hashChangeSource="internal"
-		var self=$(this)
-		var targetEl=self.attr(PREFIX+"-target"),
+		var self=$(this),
+		    targetEl=self.attr(PREFIX+"-target"),
 				href=self.attr("href"),
 				currFragment=$(targetEl).attr(PREFIX+"-fragment"),
 				condition=ac.rmMustashes(self.attr(PREFIX+"-condition"))
 
 		var btn=$(e.originalEvent.explicitOriginalTarget)
+		if (!btn[0])
+		  btn=self.find("[type=submit]")
 		addSpinner(btn)
 
 		if (!targetEl) {
@@ -491,16 +495,21 @@ $(document).ready(function(){
 				return
 			}
 			t.attr(PREFIX+"-fragment",href)
-			t.attr(PREFIX+"-dataSource",self.attr(PREFIX+"-dataSource"))
+			var ds=self.attr(PREFIX+"-dataSource")
+			if(ds)
+  			t.attr(PREFIX+"-dataSource",ds)
+  		else
+  		  t.attr(PREFIX+"-dataSource",null)
+
 			$.ajax({
 				url: ac.fixAPIURL(self.attr("action")),
 				data: self.serialize(),
-				success: function(e) {
+				success: function(data) {
 					var error=false
-					for(var key in e){
-						if (e[key]["@status"]==="error") {
-							error=e[key]["@message"] || e[key]["@error"]
-							var errorDiv=btn.parents("form").find(".ac-error."+e[key]["@error"])
+					for(var key in data){
+						if (data[key]["@status"]==="error") {
+							error=data[key]["@message"] || data[key]["@error"]
+							var errorDiv=btn.parents("form").find(".ac-error."+data[key]["@error"])
 							if (errorDiv) errorDiv.addClass("show")
 							break
 						}
@@ -515,6 +524,7 @@ $(document).ready(function(){
 						window.location=r
 						return
 					}
+					appDataOP.setContext(data)
 					loadFragment(t[0])
 					ac.trigger()
 					var target=targetEl.slice(1)
